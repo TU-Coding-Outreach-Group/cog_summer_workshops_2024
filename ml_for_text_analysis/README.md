@@ -2,8 +2,8 @@
 # Machine Learning for Text Analysis
 07/10/2024
 
-__**Content creator:**__ Camille Johnston
-__**Workshop Leader:**__ 
+__**Content creator:**__ Camille Johnston  
+__**Workshop Leader:**__   
 __**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
 
 ## Description
