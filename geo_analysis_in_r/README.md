@@ -2,8 +2,8 @@
 # Geospatial Analysis & Cartography in R
 08/07/2024
 
-__**Content creator:**__ Helen Schmidt
-__**Workshop Leader:**__ 
+__**Content creator:**__ Helen Schmidt  
+__**Workshop Leader:**__   
 __**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
 
 ## Description
