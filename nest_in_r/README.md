@@ -2,8 +2,8 @@
 # Network Enrichment Significance Testing (NEST)
 07/31/2024
 
-__**Content creator:**__ Bin Li & Sarah Weinstein
-__**Workshop Leader:**__ 
+__**Content creator:**__ Bin Li  
+__**Workshop Leader:**__ Bin Li & Sarah Weinstein    
 __**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
 
 ## Description
