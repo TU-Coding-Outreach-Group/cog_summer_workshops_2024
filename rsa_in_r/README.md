@@ -2,8 +2,8 @@
 # Representational Similarity Analysis in R
 07/17/2024
 
-__**Content creator:**__ Melanie Kos
-__**Workshop Leader:**__ 
+__**Content creator:**__ Melanie Kos  
+__**Workshop Leader:**__ Melanie Kos   
 __**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
 
 ## Description
