@@ -2,8 +2,8 @@
 # Metropolis Markov Chain Monte Carlo in R
 07/24/2024
 
-__**Content creator:**__ Jeremy Haynes
-__**Workshop Leader:**__ 
+__**Content creator:**__ Jeremy Haynes  
+__**Workshop Leader:**__   
 __**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
 
 ## Description
