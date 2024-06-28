@@ -1,0 +1,333 @@
+---
+title: "Machine Learning for Text Analysis Workshop"
+author:   
+  - name: "**Content Creator: Camille Johnston**"
+  - name: "**Content Editors: Steven Martinez, Katie Jobson, Billy Mitchell, and Helen Schmidt**"
+date: "2024-07-10"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    df_print: paged
+    css: !expr here::here("_misc/style_bootcamp.css")
+knit: (function(inputFile, encoding) { 
+      out_dir <- './';
+      rmarkdown::render(inputFile,
+                        encoding=encoding, 
+                        output_file=file.path(dirname(inputFile), out_dir, 'index.html')) })
+editor_options: 
+  chunk_output_type: console
+---
+
+
+# Load Packages
+
+```{r}
+
+library(tidyverse) ## Always load tidyverse
+library(tidytext) ## Amazing package for all things text analysis
+library(tidymodels) ## Modeling framework
+library(prodlim) # When prompted with "Do you want to install from sources the package which needs compilation? (Yes/no/cancel)", type "no" and press "Enter"
+library(textrecipes) ## Helpful feature engineering for text data
+library(rstudioapi) ## set working directory
+library(LiblineaR) ## for SVM models
+library(ranger) ## for random forest models
+library(xgboost) ## for XGBoost models
+
+```
+
+
+# Load data 
+
+From https://www.kaggle.com/datasets/schmoyote/coffee-reviews-dataset?select=coffee_analysis.csv, I cleaned it up a little bit beforehand 
+```{r}
+
+## Set working directory to wherever this script is
+setwd(dirname(getActiveDocumentContext()$path))
+
+## Load in csv from that path
+coffee <- read.csv("coffee.csv")
+
+```
+
+
+# Exploring our data
+
+Let's take a look at our data!
+```{r, fig.dim = c(11, 7)}
+
+## What's our overall distribution of ratings?
+coffee %>%
+  ggplot(aes(rating)) +
+  geom_histogram(binwidth = 0.999999, color = "black", fill = "#B79990") +
+  theme_classic()
+
+## Unnest tokens for plots
+tidy_coffee <- coffee %>%
+  unnest_tokens(word, review)
+
+## Basic look at most common words
+print(tidy_coffee %>%
+  count(word, sort = TRUE) %>% 
+  slice_head(n = 50))
+
+## On average, which words are used for higher vs. lower scores
+tidy_coffee %>%
+  ## Group data by word
+  group_by(word) %>%  
+  ## Count the number of occurrences and average rating associated with each word
+  summarise(number_of_uses = n(),
+            rating = mean(rating)) %>%
+  ## Filter out words that appear fewer than 30 times
+  filter(number_of_uses >= 30) %>%
+  ## Set up the ggplot with uses on the x-axis and rating on the y-axis
+  ggplot(aes(number_of_uses, rating)) +
+  ## Add a horizontal line at the overall mean rating
+  geom_hline(yintercept = mean(coffee$rating), lty = 2, color = "gray50") +
+  ## Add text labels for each word, avoiding overlap
+  geom_text(aes(label = word), check_overlap = TRUE, vjust = "top", hjust = "left") +  
+  ## Use a logarithmic scale for the x-axis
+  scale_x_log10() + 
+  ## Yse classic theme
+  theme_classic() 
+
+```
+
+
+# Set up our "data budget" 
+
+A data budget refers to the careful allocation of a dataset into different parts for training, testing, and validation. 
+This ensures that the model can be trained and evaluated effectively, preventing overfitting and ensuring that the model generalizes well to unseen data.
+
+Note: we'll use cross-validation folds here, but you could always use `bootstraps()` instead of `vfold_cv()` if you would prefer that approach.
+(Uses replacement, good for small datasets)
+
+```{r}
+
+## Set seed for reproducibility
+set.seed(123)
+
+## Split data into training and testing sets
+## Stratifying by the 'rating' distribution of ratings in both sets
+coffee_split <- initial_split(coffee, strata = rating)
+coffee_train <- training(coffee_split)
+coffee_test <- testing(coffee_split)
+
+## Set another seed for reproducibility (this is what the experts do, idk why)
+set.seed(234)
+## Create cross-validation folds from the training set for model evaluation
+coffee_folds <- vfold_cv(coffee_train, strata = rating)
+## View folds
+print(coffee_folds)
+
+```
+
+
+# Set up feature engineering recipes
+
+Feature engineering is the process of creating features (i.e., input variables) for you machine learning model. 
+In this context, we are creating features from text data using techniques like tokenization, TF/TF-IDF, and normalization. 
+Later on, we'll compare these approaches to see which one performs best.
+
+```{r}
+
+## Recipe 1: tokenizing text and computing TF-IDF features for top 500 words
+coffee_rec_tfidf <- 
+  recipe(rating ~ review, data = coffee_train) %>%
+  step_tokenize(review) %>%
+  step_tokenfilter(review, max_tokens = 500) %>%
+  step_tfidf(review)
+
+## Recipe 2: tokenizing text and computing TF features for top 500 words
+coffee_rec_tf <- 
+  recipe(rating ~ review, data = coffee_train) %>%
+  step_tokenize(review) %>%
+  step_tokenfilter(review, max_tokens = 500) %>%
+  step_tf(review)
+
+## Recipe 3: tokenizing text, computing TF-IDF features for top 500 words, 
+##  and also removing stopwords and normalizing all predictor variables
+coffee_rec_tfidf_stop_norm <- 
+  recipe(rating ~ review, data = coffee_train) %>%
+  step_tokenize(review) %>%
+  step_stopwords(review) %>%
+  step_tokenfilter(review, max_tokens = 500) %>%
+  step_tfidf(review) %>% 
+  step_normalize(all_predictors())
+
+
+## Check that these steps are working (not required)
+prep(coffee_rec_tfidf) %>% bake(new_data = NULL)
+prep(coffee_rec_tf) %>% bake(new_data = NULL)
+prep(coffee_rec_tfidf_stop_norm) %>% bake(new_data = NULL)
+
+```
+
+
+# Create some model specifications we want to try
+
+When working with machine learning, you might want to try different types of models to find the one that works best for your specific use case.
+Here, we are creating model specifications for three popular algorithms: Linear Support Vector Machine (SVM), Random Forests (RF), and XGBoost (XGB).
+Each has its strengths and can be suitable for different types of data and problems!
+
+We are using the "regression" mode for all of these since we are predicting a continuous outcome. 
+Many models have a "classification" mode for categorical predictions. 
+
+NOTE: We are going to use all of the defaults for these models. 
+In practice, you should absolutely tune important parameters!
+For an example, see something like https://juliasilge.com/blog/wind-turbine/
+
+```{r}
+
+## Linear Support Vector Machine is typically a good one for text data
+svm_spec <-
+  svm_linear() %>%
+  set_mode("regression")
+
+## Random forests might be okay given that this dataset involves very short text descriptions
+rf_spec <- 
+  rand_forest() %>%
+  set_mode("regression")
+
+## XGBoost is really popular, so let's give it a try
+xgb_spec <-
+  boost_tree() %>%
+  set_mode("regression")
+
+```
+
+
+# Put the preprocessing steps and model specification together in a workflow
+
+A workflow helps streamline the process of data preprocessing and model training.
+By combining preprocessing steps and model specifications into a single workflow, you can easily manage and compare different models.
+Here, we combine multiple preprocessing recipes and model specifications into a workflowset to facilitate easy comparison and evaluation.
+
+```{r}
+
+## Example of setting up an individual workflow
+#svm_workflow <- workflow(coffee_rec, svm_spec)
+
+## Set up workflowset (i.e., combining different preprocessing recipes and model specifications)
+coffee_models <-
+  workflow_set(
+    preproc = list(tfidf = coffee_rec_tfidf,                       ## TF-IDF preprocessing recipe
+                   tf = coffee_rec_tf,                             ## Term frequency preprocessing recipe
+                   tfidf_stop_norm = coffee_rec_tfidf_stop_norm),  ## TF-IDF with stopwords removal and normalization recipe
+    models = list(svm = svm_spec,   ## Linear SVM model specification
+                  rf = rf_spec,     ## Random Forest model specification
+                  xgb = xgb_spec),  ## XGBoost model specification
+    cross = TRUE)  ## Cross all preprocessing recipes with all models
+
+## Print the workflow set to check the combinations
+coffee_models
+```
+
+
+# Evaluate models
+
+Evaluating different models involves fitting them to the training data and then assessing their performance using our cross-validation folds.
+`fit_resamples` trains the model on the training portion of each resample, and evaluates it on the test portion.
+
+```{r}
+
+## Register parallel backend to use multiple processors
+doParallel::registerDoParallel()
+
+## Control resamples to save predictions
+contrl_preds <- control_resamples(save_pred = TRUE)
+
+## Example of running one model at a time
+## Fit the SVM workflow to the resamples
+#svm_resamples <- fit_resamples(svm_workflow,
+#                               resamples = coffee_folds,
+#                               control = contrl_preds)
+
+## Fit all models at once using the workflow set
+coffee_resamples <- coffee_models %>%
+  workflow_map("fit_resamples",                 ## Specify that we want to fit resamples (cross-validation)
+               resamples = coffee_folds,        ## Use the cross-validation folds created earlier
+               control = contrl_preds,          ## Control settings for resampling, e.g., save predictions
+               metrics = metric_set(rmse, rsq)) ## Specify the metrics to evaluate: Root Mean Squared Error (rmse) and R-squared (rsq)
+```
+
+
+# How do these models compare?
+
+After fitting the models, we compare their performance by collecting metrics, visualizing the results, and ranking the models.
+This helps us identify the best model and preprocessing combination for our data.
+
+```{r}
+
+## Collect the metrics for all models
+collect_metrics(coffee_resamples)
+
+## Visualize the performance of each model
+autoplot(coffee_resamples)
+
+## Rank the models based on Root Mean Squared Error (RMSE)
+## This identifies models that minimizes prediction error
+rank_results(coffee_resamples, rank_metric = "rmse") 
+## Rank the models based on R-squared (R²)
+## This identifies models that explain the most variance in the data
+rank_results(coffee_resamples, rank_metric = "rsq") 
+
+```
+
+
+# Final fit 
+
+Let's select the best workflow for reducing error, and make it our final workflow. 
+The `last_fit` function fits the final model on the training data and evaluates it on the test data.
+You only want to touch the test data once! Only use it when you're really sure.
+If the metrics look much worse on your testing data, it's a sign of overfitting to the training data.
+
+```{r}
+
+## Create the final workflow with the best preprocessing recipe and model specification
+coffee_finalworkflow <- workflow(coffee_rec_tfidf_stop_norm, svm_spec)
+
+## Fit the final model using the training data and evaluate it on the test data
+coffee_finalfitted <- last_fit(coffee_finalworkflow, coffee_split)
+
+## Collect and display the metrics evaluated on the *testing* data
+collect_metrics(coffee_finalfitted)
+
+```
+
+
+# Visualize results 
+
+Extracting the model's coefficients and visualizing the terms with the highest absolute estimates
+This helps in understanding which terms (words) are most strongly associated with high or low ratings
+
+```{r, fig.dim = c(8, 8)}
+
+## Extract the final fitted workflow
+extract_workflow(coffee_finalfitted) %>%
+  ## Convert the model coefficients into a tidy format
+  tidy() %>%
+  ## Filter out the intercept term
+  filter(term != "Bias") %>% 
+  ## Group by whether the estimate is positive or negative
+  group_by(estimate > 0) %>%
+  ## Select the top 15 terms with the highest absolute estimates
+  slice_max(abs(estimate), n = 15) %>%
+  ungroup() %>%
+  ## Clean up the term names by removing the prefix
+  mutate(term = str_remove(term, "tfidf_review_")) %>% 
+  ## Create a bar plot of the estimates
+  ggplot(aes(estimate, fct_reorder(term, estimate), fill = estimate > 0)) +
+  geom_col(alpha = 0.8) +
+  ## Manually set pretty coffee colors for positive and negative estimates
+  scale_fill_manual(values = c("#B79990", "#784F41"), labels = c("low ratings", "high ratings")) +
+  ## Add labels and use a classic theme
+  labs(y = NULL, fill = "Associated with...") + 
+  theme_classic() +
+  ## Increase the size of y-axis labels
+  theme(axis.text.y = element_text(size = 12))
+
+```
+
+## If I worked for this coffee company, I might recommend avoiding woody notes in the future :)
