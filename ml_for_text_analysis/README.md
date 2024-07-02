@@ -36,16 +36,16 @@ Since we are focusing on regression models (i.e., predicting continuous outcomes
 ## Outline
 | Section | Description | Time |
 | --- | --- | --- |
-| Intro | Video | XX minutes |
-| Setup | Load packages and data | XX minutes |
-| Section 1 | Explore data | XX minutes |
-| Section 2 | Set up "data budget" | XX minutes |
-| Section 4 | Set up feature engineering | XX minutes |
-| Section 5 | Create model specifications and workflow | XX minutes |
-| Section 6 | Fit and compare models | XX minutes |
-| Section 7 | Visualize results | XX minutes |
-| Conclusion | Q & A | XX minutes |
+| Intro | Video | 5 minutes |
+| Setup | Load packages and data | 2 minutes |
+| Section 1 | Explore data | 5 minutes |
+| Section 2 | Set up "data budget" | 5 minutes |
+| Section 4 | Set up feature engineering | 10 minutes |
+| Section 5 | Create model specifications and workflow | 10 minutes |
+| Section 6 | Fit and compare models | 10 minutes |
+| Section 7 | Visualize results | 5 minutes |
+| Conclusion | Q & A | 10 minutes |
 
 ## Additional Reading (for folks who want to do a deep dive):
-[Tidy Modeling with R](https://www.tmwr.org/)
+[Tidy Modeling with R](https://www.tmwr.org/) and
 [Supervised Machine Learning for Text Analysis in R](https://smltar.com/)
