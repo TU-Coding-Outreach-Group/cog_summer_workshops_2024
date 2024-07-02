@@ -21,6 +21,11 @@ editor_options:
 ---
 
 
+```{r Introduction Video, echo = FALSE}
+vembedr::embed_url("https://youtu.be/fSwPO7mECF8")
+```
+
+
 # Load Packages
 
 ```{r}
