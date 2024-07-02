@@ -23,7 +23,8 @@ This workshop demands that users:
 3. Download the relevant packages (See below)
     
 ## Workshop materials:
-- [Notebook Viewer]()
+- [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/ml_for_text_analysis/index.html)
+
 
 ## What We Won't Cover:
 
