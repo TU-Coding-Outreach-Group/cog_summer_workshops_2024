@@ -6,8 +6,8 @@ If you aren't familiar and are having trouble with downloading the materials, co
 
 ## Agenda
 Workshops are on Wednesdays from July 10th to August 07th, 1:00pm to 3:00pm
-**| Date        | Workshop       | Presenter  | Language    |**
-| :-----------: |:------------------------------------:| :-----------:|
+**| Date  | Workshop | Presenter  | Language    |**
+| :-----------: |:------------------------------------:| :-----------:| | :-----------:|
 | 07 / 10    | [Machine Learning for Text Analysis](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2024/tree/main/ml_for_text_analysis)  | [Camille Johnston]() | R |
 | 07 / 17    | [Representational Similarity Analysis](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2024/tree/main/rsa_in_r)   | [Melanie Kos]() | R |
 | 07 / 24    | [Metropolis Markov Chain Monte Carlo in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2024/tree/main/metro_mcmc_in_r)  | [Jeremy Haynes]() | R |
