@@ -163,9 +163,9 @@ coffee_rec_tfidf_stop_norm <-
 
 
 ## Check that these steps are working (not required)
-prep(coffee_rec_tfidf) %>% bake(new_data = NULL)
-prep(coffee_rec_tf) %>% bake(new_data = NULL)
-prep(coffee_rec_tfidf_stop_norm) %>% bake(new_data = NULL)
+print(prep(coffee_rec_tfidf) %>% bake(new_data = NULL))
+print(prep(coffee_rec_tf) %>% bake(new_data = NULL))
+print(prep(coffee_rec_tfidf_stop_norm) %>% bake(new_data = NULL))
 
 ```
 
