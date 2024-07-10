@@ -2,7 +2,7 @@
 # Machine Learning for Text Analysis
 07/10/2024
 
-__**Content creator:**__ Camille Johnston 
+__**Content creator:**__ Camille (Johnston) Parker
 __**Content editors:**__ Steven Martinez
 
 ## Description
@@ -29,6 +29,15 @@ This workshop requires that users:
 ## Workshop materials:
 - [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/ml_for_text_analysis/index.html)
 
+## Other Relevant COG Workshops:
+COG Workshops are often iterative; they build upon other workshops that we've already created. If you are unfamiliar with this topic, we recommend taking a look at some of our previous workshops to build some familiarity:
+
+| Date        | Workshop                             | Presenter  |
+| :-----------: |:------------------------------------:| :-----------:|
+| 2023 Workshop Series    | [Machine Learning](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2023/tree/master/machine_learning)                      | [Helen Schmidt](https://hschmidt12.github.io/) |
+| 2023 Workshop Series       | [Text Analysis in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2023/tree/master/text_analysis)                      | [Camille (Johnston) Parker](https://www.linkedin.com/in/camille-parker-489365162/) |
+| 2023 Workshop Series       | [Dyadic Analysis in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2023/tree/master/dyadic_analysis)                      | [Ginny Ulichney](https://www.linkedin.com/in/ginny-ulichney/) |
+| 2022 Workshop Series    | [Natural Language Processing](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2022/tree/main/nlp)                      | [Celia Litovsty](https://www.celialitovsky.com/) |
 
 ## What We Won't Cover:
 Since we are focusing on regression models (i.e., predicting continuous outcomes), we will not be covering classification models (i.e., predicting groups).

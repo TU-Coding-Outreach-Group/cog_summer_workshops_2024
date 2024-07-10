@@ -32,6 +32,11 @@ This workshop demands that users:
 | Section | Description | Time |
 | --- | --- | --- |
 
+## Other Relevant COG Workshops:
+COG Workshops are often iterative; they build upon other workshops that we've already created. If you are unfamiliar with this topic, we recommend taking a look at some of our previous workshops to build some familiarity:
+
+| Date        | Workshop                             | Presenter  |
+| :-----------: |:------------------------------------:| :-----------:|
 
 ## Supplemental Information
 Please see the `References and recommended resources` section of the Notebook Viewer

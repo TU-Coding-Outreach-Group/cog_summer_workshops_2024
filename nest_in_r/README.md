@@ -27,6 +27,12 @@ This workshop demands that users:
 
 ## What We Won't Cover:
 
+## Other Relevant COG Workshops:
+COG Workshops are often iterative; they build upon other workshops that we've already created. If you are unfamiliar with this topic, we recommend taking a look at some of our previous workshops to build some familiarity:
+
+| Date        | Workshop                             | Presenter  |
+| :-----------: |:------------------------------------:| :-----------:|
+
 
 ## Outline
 | Section | Description | Time |

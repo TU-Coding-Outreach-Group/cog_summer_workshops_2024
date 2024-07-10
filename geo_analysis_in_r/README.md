@@ -32,6 +32,14 @@ This workshop demands that users:
 | Section | Description | Time |
 | --- | --- | --- |
 
+## Other Relevant COG Workshops:
+COG Workshops are often iterative; they build upon other workshops that we've already created. If you are unfamiliar with this topic, we recommend taking a look at some of our previous workshops to build some familiarity:
+
+| Date        | Workshop                             | Presenter  |
+| :-----------: |:------------------------------------:| :-----------:|
+| 2022 Workshop Series    | [Data Visualization in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2022/tree/main/data-visualization-in-r)                      | [Billy Mitchell](https://wj-mitchell.github.io/) |
+| 2021 Workshop Series    | [Data Visualization in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2021/tree/main/data-visualization-in-r)                      | [Billy Mitchell](https://wj-mitchell.github.io/) |
+| 2020 Workshop Series    | [Plotting data in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2020/tree/master/plotting-data-in-r)                      | [Cristina Wilson](https://www.radlab.us/people) |
 
 ## Supplemental Information
 Please see the `References and recommended resources` section of the Notebook Viewer

@@ -28,6 +28,17 @@ This workshop demands that users:
 ## What We Won't Cover:
 
 
+## Other Relevant COG Workshops:
+COG Workshops are often iterative; they build upon other workshops that we've already created. If you are unfamiliar with this topic, we recommend taking a look at some of our previous workshops to build some familiarity:
+
+| Date        | Workshop                             | Presenter  |
+| :-----------: |:------------------------------------:| :-----------:|
+| 2022 Workshop Series       | [Representational Similarity Analysis in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2022/tree/main/rsa)                      | [Büşra Tanrıverdi](https://www.linkedin.com/in/busratanriverdi/) |
+| 2021 Workshop Series       | [Representational Similarity Analysis in Python](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2021/tree/main/rsa)                      | [Haroon Popal](https://hspopal.github.io/) |
+| 2020 Workshop Series    | [Representational Similarity Analysis in R](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2020/tree/master/representational-similarity-analysis)                      | [Iva Brunec](https://ivabrunec.github.io/) |
+
+
+
 ## Outline
 | Section | Description | Time |
 | --- | --- | --- |
