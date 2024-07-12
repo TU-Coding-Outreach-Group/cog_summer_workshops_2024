@@ -2,8 +2,10 @@
 # Machine Learning for Text Analysis
 07/10/2024
 
-__**Content creator:**__ Camille (Johnston) Parker
+__**Content creator:**__ Camille (Johnston) Parker  
 __**Content editors:**__ Steven Martinez
+
+## [Full Workshop Recording](https://youtu.be/dhtBfTW2OSg)
 
 ## Description
 This week's workshop dives into predictive modeling using text data with R! Specifically, we'll be using customer reviews to predict ratings for different types of coffee. We'll start by exploring the data, continue through feature engineering with packages like tidytext and tidymodels, and compare various regression models. The workshop highlights hands-on techniques for data visualization, model evaluation, and the interpretation of results. By the end, attendees will be equipped to apply these methods to their own datasets, enhancing their ability to analyze and predict outcomes from text data.
