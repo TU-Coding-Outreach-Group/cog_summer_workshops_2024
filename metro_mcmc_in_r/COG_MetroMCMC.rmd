@@ -1,8 +1,8 @@
 ---
-title: "Metropolic Markov Chain Monte Carlo Simulations in R"
+title: "Metropolis Markov Chain Monte Carlo Simulations in R"
 author:   
   - name: "**Content Creator: Jeremy Haynes**"
-  - name: "**Content Editors: Steven Martinez, Katie Jobson, Billy Mitchell, and Helen Schmidt**"
+  - name: "**Content Editors: Billy Mitchell**"
 date: "2024-07-24"
 output:
   html_document:
