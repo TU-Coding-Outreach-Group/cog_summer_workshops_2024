@@ -1,0 +1,518 @@
+---
+title: "Metropolic Markov Chain Monte Carlo Simulations in R"
+author:   
+  - name: "**Content Creator: Camille Johnston**"
+  - name: "**Content Editors: Steven Martinez, Katie Jobson, Billy Mitchell, and Helen Schmidt**"
+date: "2024-07-24"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    toc_depth: 2
+    df_print: paged
+    css: !expr here::here("_misc/style_bootcamp.css")
+knit: (function(inputFile, encoding) { 
+      out_dir <- './';
+      rmarkdown::render(inputFile,
+                        encoding=encoding, 
+                        output_file=file.path(dirname(inputFile), out_dir, 'index.html')) })
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r Introduction Video, echo = FALSE}
+# vembedr::embed_url("")
+```
+
+
+# Install/Load Packages
+```{r}
+knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.align = "center")
+
+# -------------------------------------
+# INSTALL THESE IF YOU NEED THEM
+# install.packages("tidyverse")
+# install.packages("gganimate")
+# install.packages("here")
+# install.packages("extraDistr")
+
+# -------------------------------------
+# LOAD PACKAGES
+library(tidyverse)
+library(gganimate)
+library(here)
+library(extraDistr)
+```
+
+
+# Load Data
+For the sake of time, I will not be walking through how I simulated the data for the workshop; however, I highly recommend taking the time to [go through the code (demand_data_simulation.R)](). Knowing how to simulate data that is relevant to your work is an excellent way to truly understand the characteristics of the data that you work with. In addition, simulating data for a model forces you to think more deeply about the assumptions and constraints you are imposing with your model.
+
+## Load Data
+```{r}
+demand_data = readRDS(here("metro_mcmc_in_r", "demand_data.RDS"))
+```
+
+## Inspect Data
+The dataset contains 4 variables: $id$, $year$ (years using fentanyl), $sex$ (female = 0, male = 1), and $log_elasticity$ (how sensitive consumption/demand is to changes in price). These data are already formatted for our purposes, but it is worth inspecting the data.
+```{r}
+# QUICK PEAK
+head(demand_data)
+
+# SCATTERPLOT
+plot(demand_data$year, demand_data$log_elasticity)
+
+# HISTOGRAM
+hist(demand_data$log_elasticity)
+
+# SUMMARY STATISTICS
+summary(demand_data)
+
+# CLASSES OF VARIABLES
+sapply(demand_data, class)
+```
+
+
+# Specify Model
+## The Model
+Before programming the MCMC, we need to specify each part of our model. To begin, let's specify the model we assume generated the data (i.e., the regression model):
+$$y_i = \beta_0 + \beta_1 x_i +  \epsilon_i$$
+
+where 
+
+$$\epsilon_i \sim Normal(0,\sigma^2)$$
+
+An equivalent way to write this is to specify the whole model as the following:
+
+$$y_i \sim Normal(\beta_0 + \beta_1 x_i,\sigma^2)$$
+Using this parameterization will make things easier to understand later on.
+
+Overall, we have three parameters to estimate: $\beta_0$, $\beta_1$, and $\sigma^2$. Because many of the functions we'll be using (e.g., $dnorm()$) take standard deviations as their input, we will estimate $\sigma$. Therefore, our goal is to use MCMC to estimate the posterior distributions of $\beta_0$, $\beta_1$, and $\sigma$, given the observed data $y$:
+$$P(\beta_0, \beta_1,\sigma|y_i)$$
+
+We'll do this with Bayes rule:
+$$P(\beta_0, \beta_1,\sigma|y_i) = \frac{P(y_i|\beta_0, \beta_1,\sigma) \cdot P(\beta_0) P(\beta_1) P(\sigma)}{P(y_i)}$$
+
+Because we're using MCMC to sample from the posterior distribution, we do not need to estimate the marginal distribution (i.e., the denominator): $P(y_i)$. Thus,
+$$P(\beta_0, \beta_1,\sigma|y_i) \propto P(y_i|\beta_0, \beta_1, \sigma) \cdot P(\beta_0) P(\beta_1) P(\sigma)$$
+Where we have the posterior distribution on the left as proportional to the joint distribution of the prior and the likelihood on the right. Now that we've specified our model, we need to build each piece.
+
+
+## The Likelihood
+Here, our goal is to calculate the probability of the data, given a set of parameter values:
+$$P(y_i|\beta_0, \beta_1, \sigma)$$
+
+We'll do this by calculating the joint probability of all the data assuming the data were generated from a given set of parameters.
+$$= P(y_1|\beta_0, \beta_1, \sigma) \times P(y_2|\beta_0, \beta_1, \sigma) \times... P(y_N|\beta_0, \beta_1, \sigma)$$
+
+We do this in a surprisingly simple way. Remember what our model is:
+
+$$y_i \sim Normal(\beta_0 + \beta_1 x_i, \sigma)$$
+
+R has built-in functions to calculate the probability of a given value according to a pre-specified mean and standard deviation: $dnorm(x, mean = 0, sd = 1, log = FALSE)$. (technically, these are probability densities because we're working with continuous variables) Remember that we want to do this in log-space, so in the function, we'll specify $log = TRUE$. Because of this, we'll be adding the log-likelihoods together instead of multiplying them: $Log\big[P(y_1|\beta_0, \beta_1, \sigma)\big] + Log\big[P(y_2|\beta_0, \beta_1, \sigma)\big] +... Log\big[P(y_N|\beta_0, \beta_1, \sigma)\big]$. We will calculate the likelihood for each iteration of the MCMC; therefore, to simplify things, we'll make a function to do this. The inputs for this function will be the data and parameter values; the output will be the joint probability of the data given the parameters (i.e., it'll just be a single probability).
+
+```{r}
+calculate_likelihood = function(y, x, B0, B1, sigma){
+  # calculate log likelihood of our data, given the model
+  log_likelihood =
+    # first, we'll calculate the log-likelihood of each observation
+    dnorm(y,         # data we want probabilities for
+          B0 + B1*x, # current parameter for the mean
+          sigma,     # current parameter for sigma
+          log = TRUE # log probability density to avoid Pbxs with small numbers problems
+    ) %>%
+    # next, we'll sum those log-likelihoods to get our joint probability
+    sum()
+  # return that stuff
+  return(log_likelihood)
+}
+```
+
+
+## Priors
+Here, we want to calculate the prior probability of a given parameter value. That is, the probability of a given parameter value INDEPENDENT OF THE DATA.
+$$P(\beta_0), P(\beta_1), P(\sigma)$$
+
+We're going to specify these priors separately for each parameter. Let's set very weakly informative priors:
+$$\beta_0 \sim Normal(0, 50)$$
+
+$$\beta_1 \sim Normal(0, 50)$$
+
+$$\sigma \sim Half-Cauchy(0, 50)$$
+Why am I using a half-Cauchy distribution for the prior on $\sigma$?... I know that sigma HAS TO BE POSITIVE (standard deviations cannot be negative). Thus, I'm specifying the half-Cauchy so that only positive values are plausible.
+
+It's wise to plot your priors to get a sense of what you're assuming with them:
+```{r}
+# INTERCEPT
+B0_prior = rnorm(1000, 0, 50) # draw 1000 random values from our prior
+hist(B0_prior, breaks = 50)   # make a histogram of those random draws
+# plot the probability of a range of parameter values - let's do +/-200
+plot(x = -200:200, y = dnorm(-200:200, 0, 50), 
+     xlab = "B0", ylab = "probability",
+     type = "l")
+
+# SLOPE
+B1_prior = rnorm(1000, 0, 50) # draw 1000 random values from our prior
+hist(B1_prior, breaks = 50)   # make a histogram of those random draws
+# plot the probability of a range of parameter values
+plot(x = -200:200, y = dnorm(-200:200, 0, 50), 
+     xlab = "B1", ylab = "probability",
+     type = "l")
+```
+
+With a half-Cauchy prior distribution, you'll notice that when randomly drawing from the prior, you'll occasionally get a very large sigma value. This can make the histogram unhelpful, so I show two histograms: one with the full distribution of random draws from the prior, and one with the random draws whose value is below 200. A common alternative to the half-Cauchy is a half-normal distribution. I plot a half-normal distribution on the density plot (in red) to illustrate the similarities and differences.
+```{r}
+# SIGMA
+sigma_prior = rhcauchy(1000, 50) # draw 1000 random values from our prior
+hist(sigma_prior, breaks = 50) # make a histogram of those random draws
+hist(sigma_prior[sigma_prior<200], breaks = 50) # make a histogram of those random draws
+# plot the probability of a range of parameter values
+plot(x = 0:200, y = dhcauchy(0:200, 50),
+     xlab = "sigma", ylab = "probability",
+     type = "l", ylim = c(0, .0175))
+lines(x = 0:200, y = dhnorm(0:200, 50), col = "red") # plot a half-normal for reference
+```
+
+### Considerations for Priors
+Is the range of plausible parameter values captured by this distribution? For example, set a much more informative prior on $\beta_1$ (by lowering the SD to say 1) and think about whether your mean would fall in this range. Compare with your weakly informative prior. The first 2 plots show what a more informative prior looks like on the same x-axis scale as before. The next 2 plots show what that prior looks like on a smaller x-axis scale.
+```{r}
+B1_prior = rnorm(1000, 0, 1)
+hist(B1_prior, breaks = 50, xlim = c(-200, 200))
+plot(x = -200:200, y = dnorm(-200:200, 0, 1), 
+     xlab = "B1", ylab = "probability",
+     type = "l")
+
+
+hist(B1_prior, breaks = 50, xlim = c(-10, 10))
+plot(x = -10:10, y = dnorm(-10:10, 0, 1), 
+     xlab = "B1", ylab = "probability",
+     type = "l")
+```
+
+Does this distribution suggest ridiculous values are plausible? Set a uniform prior for $\beta_1$ ranging from values that are functionally infinite (e.g., -10000 to +10000).
+```{r}
+hist(runif(1000, -10000, +10000), breaks = 50)
+```
+Are values of +/-10000 even remotely realistic? You have prior knowledge about this. Use that. I personally know that log elasticities as extreme as say +/-10 would be rare, and values as extreme as +/-100 are probably impossible given the constraints of the task (remember, tasks can only provide a range of values - e.g., an SAT scores have a minimum of 400). For this data, $Normal(0,50)$ priors are very weakly informative, so stronger priors could be appropriate. Note, however, that the scaling of your variables affects how informative your priors are too. For example, if you were to recode years of fentanyl use into days without changing the prior on the slope effect (i.e., $\beta_1$), that prior now becomes extraordinarily uninformative. This is because the expected slope effect is $\sim \beta_1 / 365$. The reverse is also true (e.g., if we recoded years of fentanyl use into decades).
+
+As with the likelihood, we'll calculate our prior probabilities during each iteration of the MCMC; thus, we should throw this into a function to make things easier.
+```{r}
+prior_B0 = function(B0, mu = 0, sigma = 50){
+  # calculate probability of the parameter
+  log_prior = dnorm(x = B0,  # specify parameter
+                    mean = mu,  # specify mean of our prior distribution
+                    sd = sigma, # specify SD of our prior distribution
+                    log = T)    # return log probability density to avoid Pbxs with small numbers
+  return(log_prior)
+}
+```
+
+```{r}
+prior_B1 = function(B1, mu = 0, sigma = 50){
+  # calculate probability of the parameter
+  log_prior = dnorm(x = B1,   # specify parameter
+                    mean = mu,  # specify mean of our prior distribution
+                    sd = sigma, # specify SD of our prior distribution
+                    log = T)    # return log probability density
+  return(log_prior)
+}
+```
+
+```{r}
+prior_sigma = function(current_sigma, sigma = 50){
+  # calculate probability of the parameter
+  log_prior = dhcauchy(x = current_sigma, # specify parameter
+                       sigma = sigma,     # specify SD of our prior distribution
+                       log = T)           # return log probability density
+  return(log_prior)
+}
+```
+
+
+# Build the MCMC Sampler
+Now that we have the functions we need to calculate our likelihood and priors, we'll use these functions in a Metropolis MCMC to estimate our regression model.
+```{r}
+###################
+#### INITIAL SETUP
+###################
+set.seed(20240615)   # set the seed so that you can reproduce the results
+n_iterations = 20000 # specify length of the MCMC chain(s)
+
+# tuning parameters - standard deviations for Gaussian random walks to generate proposals
+tuning = .5
+tuning_B1 = .05 # because of the scaling of years, I needed to adjust this specific tuning parameter
+
+# an empty dataframe to store our posterior distribution
+posterior = data.frame(iteration = 1:n_iterations,
+                       # posterior samples of each parameter
+                       B0 = numeric(n_iterations),
+                       B1 = numeric(n_iterations),
+                       sigma = numeric(n_iterations),
+                       # whether candidates on each iteration were accepted (1) or rejected (0)
+                       accept_B0 = numeric(n_iterations),
+                       accept_B1 = numeric(n_iterations),
+                       accept_sigma = numeric(n_iterations)) 
+
+
+# STEP 0: CHOOSE INITIAL VALUES - anything that's not too wild; we just need to get the MCMC started
+posterior$B0[1] = runif(1, -10, 10) 
+posterior$B1[1] = runif(1, -10, 10) 
+posterior$sigma[1] = runif(1, 0, 10)
+# we'll calculate the likelihood for these initial values
+likelihood = calculate_likelihood(y = demand_data$log_elasticity,
+                                  x = demand_data$year,
+                                  B0 = posterior$B0[1],
+                                  B1 = posterior$B1[1],
+                                  sigma = posterior$sigma[1])
+
+
+###################
+#### MCMC
+###################
+for(i in 2:n_iterations){
+  
+  ###################
+  ##### UPDATE B0
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  # we do this with a Gaussian random walk. That is, we generate a random number from a normal distribution.
+  candidate = rnorm(n = 1,                    # generate 1 random number
+                    mean = posterior$B0[i-1], # mean is the last drawn parameter estimate
+                    sd = tuning)              # tuning parameter serves as SD
+
+  # STEP 2: ESTIMATE P(ACCEPT)
+  # calculate likelihood of candidate
+  candidate_likelihood = 
+    calculate_likelihood(y = demand_data$log_elasticity,
+                         x = demand_data$year,
+                         # this is what we're focusing on
+                         B0 = candidate,
+                         # we're holding these "constant" for the moment
+                         B1 = posterior$B1[i-1],
+                         sigma = posterior$sigma[i-1])
+  
+  # calculate joint distributions for the current and candidate parameter estimates 
+  joint_current = likelihood + prior_B0(posterior$B0[i-1])
+  joint_candidate = candidate_likelihood + prior_B0(candidate)
+  
+  # calculate the ratio of probabilities between the candidate and current parameter estimates
+  R = exp(joint_candidate - joint_current)
+  
+  
+  # STEP 3: ACCEPT OR REJECT
+  if(R > runif(1)){ # this is a way of calculating a probability
+    posterior$B0[i] = candidate       # store it in the posterior,
+    posterior$accept_B0[i] = 1        # use a 1 to indicate it was accepted, and
+    likelihood = candidate_likelihood # update the likelihood for use with next parameter
+  }else{            # if we reject the candidate
+    posterior$B0[i] = posterior$B0[i-1] # store previous value in posterior
+  }
+  
+  
+  ###################
+  ##### UPDATE B1
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  candidate = rnorm(1,                 # generate 1 random number
+                    posterior$B1[i-1], # mean is the last drawn parameter estimate
+                    tuning_B1)         # tuning parameter serves as SD
+
+  # STEP 2: ESTIMATE P(ACCEPT)
+  # calculate likelihood of candidate
+  candidate_likelihood = 
+    calculate_likelihood(y = demand_data$log_elasticity,
+                         x = demand_data$year,
+                         B0 = posterior$B0[i], # we use the most recent value of the posterior
+                         B1 = candidate,       # this is our focus at the moment
+                         sigma = posterior$sigma[i-1]) # still using this value as in previous
+  
+  # calculate joint distributions
+  joint_current = likelihood + prior_B1(posterior$B1[i-1])
+  joint_candidate = candidate_likelihood + prior_B1(candidate)
+  
+  # calculate acceptance probability
+  R = exp(joint_candidate - joint_current)
+  
+  
+  # STEP 3: ACCEPT OR REJECT
+  if(R > runif(1)){ # this is a way of calculating a probability
+    posterior$B1[i] = candidate       # store it in the posterior,
+    posterior$accept_B1[i] = 1        # use a 1 to indicate it was accepted, and
+    likelihood = candidate_likelihood # update the likelihood for use with next parameter
+  }else{            # if we reject the candidate
+    posterior$B1[i] = posterior$B1[i-1] # store previous value in posterior
+  }
+  
+  
+  ###################
+  ##### UPDATE Sigma
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  # candidate = posterior$sigma[i-1] + runif(1,  -1, 1)
+  candidate = rnorm(1,                    # generate 1 random number
+                    posterior$sigma[i-1], # mean is the last drawn parameter estimate
+                    tuning)               # tuning parameter serves as SD
+  
+  # THIS IS UNIQUE TO ESTIMATING SIGMA
+  if(candidate < 0){ # if candidate is outside of range, keep old value
+    posterior$sigma[i] = posterior$sigma[i-1]
+  }else{             # otherwise, go through MCMC
+    # STEP 2: ESTIMATE P(ACCEPT)
+    # calculate likelihood of candidate
+    candidate_likelihood = 
+      calculate_likelihood(y = demand_data$log_elasticity,
+                           x = demand_data$year,
+                           B0 = posterior$B0[i],
+                           B1 = posterior$B1[i],
+                           sigma = candidate)
+    
+    # calculate joint distributions
+    joint_current = likelihood + prior_sigma(posterior$sigma[i-1])
+    joint_candidate = candidate_likelihood + prior_sigma(candidate)
+    
+    # calculate acceptance probability
+    R = exp(joint_candidate - joint_current)
+    
+    
+    # STEP 3: ACCEPT OR REJECT
+    if(R > runif(1)){ # this is a way of calculating a probability
+      posterior$sigma[i] = candidate       # store it in the posterior,
+      posterior$accept_sigma[i] = 1        # use a 1 to indicate it was accepted, and
+      likelihood = candidate_likelihood # update the likelihood for use with next parameter
+    }else{            # if we reject the candidate
+      posterior$sigma[i] = posterior$sigma[i-1] # store previous value in posterior
+    }
+  }
+}
+```
+
+
+# Diagnostics
+Ok, now that we've fit our regression model using a Metropolis-Hastings MCMC, let's process the posterior distributions that we estimated. We'll first begin with diagnostics which focuses on examining traceplots and the acceptance rate.
+
+## Trace-Plots
+Traceplots refer to lineplots illustrating the values of a parameter (y-axis) as a function of the MCMC iteration (x-axis). Our goal here is to see if the MCMC got stuck anywhere so that we can diagnose and address any estimation problems. What we want to see is a "furry caterpillar".
+
+### Full Posterior
+Here is the traceplot of the full posterior distribution. You will see that at the beginning of each traceplot, the parameter value jumps around quite a bit until quickly settling down into the most probable parameter space. That said, we do not want to use this kind of traceplot because those first iterations are generally not at the "equilibrium" point that we're looking for. This is why we typically designate the first x-number of iterations as the burn-in, shown further below.
+```{r}
+# INTERCEPT
+plot(x = posterior$iteration, 
+     y = posterior$B0,
+     type = "l", main = "B0")
+
+
+# SLOPE
+plot(x = posterior$iteration, 
+     y = posterior$B1,
+     type = "l", main = "B1")
+
+
+# SIGMA
+plot(x = posterior$iteration, 
+     y = posterior$sigma,
+     type = "l", main = "Sigma")
+```
+
+### Posterior w/o Burn-in
+I think using the first quarter as burn-in is sufficient but this is not a "hard and fast" rule. Others may feel that the first half should be used as the burn-in.
+```{r}
+burnin = 1:round(max(posterior$iteration)/4) # calculate which iterations are burn-in
+processed_posterior = posterior %>%
+  filter(!(iteration %in% burnin))           # filter out the burn-in
+
+
+# INTERCEPT
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$B0,
+     type = "l")
+
+
+# SLOPE
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$B1,
+     type = "l")
+
+
+# SIGMA
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$sigma,
+     type = "l")
+```
+... furry.
+
+## Acceptance Rates
+Now we want to calculate our acceptance rates. That is, the proportion of candidates that were accepted. This is one place to start looking if you see issues in your traceplots. In particular, if your traceplots look step-like, this might indicate that you're rejecting too many proposed candidates. This is typically a reflection of the tuning parameter being too large for the random walk which results in large steps being taken by the random walk in generating candidates, and these large steps often result in unlikely parameter values. Remember that I specified a separate tuning parameter for the slope (i.e.,$\beta_1$). When I used the same tuning parameter for estimating all of the regression parameters, I encountered this issue with the posterior distribution for the slope. This occurred because the slope effect is fairly small; thus, when I had a large tuning parameter, this resulted in many proposals being rejected. Generally, your acceptance rate should be somewhere between 25 and 35%, but this is also not a "hard and fast" rule.
+```{r}
+processed_posterior %>% 
+  select(accept_B0, accept_B1, accept_sigma) %>% 
+  sapply(mean) %>% round(2)
+```
+These look good.
+
+
+# Summarizing Posteriors
+After looking at our diagnostics for the posterior distributions, and they are "ok", we can move on to summarizing and drawing inferences regarding our posterior distributions.
+
+## Distribution Plots
+I personally find histograms (or density plots) to be a good way to summarize and show posterior distributions. Here, I plot histograms of the posterior distributions of each parameter with solid red vertical lines for the posterior means and dashed vertical lines for the true values of the parameters (remember, I generated these data from known parameter-values).
+```{r}
+# INTERCEPTS
+hist(x = processed_posterior$B0, breaks = 50)                  # plot distribution
+abline(v = mean(processed_posterior$B0), col = "red", lwd = 2) # vertical line at the posterior mean
+abline(v = log(.025), col = "red", lty = "dashed", lwd = 2)    # vertical line at true B0
+
+
+# SLOPES
+hist(x = processed_posterior$B1, breaks = 50)                  # plot distribution
+abline(v = mean(processed_posterior$B1), col = "red", lwd = 2) # vertical line at the posterior mean
+abline(v = log(.75), col = "red", lty = "dashed", lwd = 2)     # vertical line at true B1
+
+
+# SIGMAS
+hist(x = processed_posterior$sigma, breaks = 50)                  # plot distribution
+abline(v = mean(processed_posterior$sigma), col = "red", lwd = 2) # vertical line at the posterior mean
+abline(v = 1, col = "red", lty = "dashed", lwd = 2)     # vertical line at true B1
+```
+
+
+## Summary Statistics
+Quantitative summary statistics are also helpful. Generally, you'll want to show the posterior means along with some measure of spread for those posterior means. Here, I calculate 95% inner quantile ranges which can be thought of as similar to confidence intervals. Thus, we could interpret 95% IQRs that do not overlap with 0 as indicating significance. Technically speaking, we would actually want to base inference off of highest density credible intervals (HDCIs). These intervals align more closely with the interpretation we want to make; that is, HDCIs tell us the range of parameter values with some percent probability which is actually more akin to a confidence interval. IQRs and HDCIs are usually similar, so we'll use IQRs here. There are many packages that will calculate HDCIs. I recommend the $hBayesDM$ package which has a $HDIofMCMC$ function which accepts a vector of posterior samples. Finally, it's worth looking at how well our MCMC does compared to the more traditional frequentist approach, so there is code below for looking at that as well.
+```{r}
+# SUMMARIZE PARAMETER VALUES - Posterior Means & Inner Quantile Ranges
+# B0 - true value = log(.025) = -3.688879
+mean(processed_posterior$B0)
+quantile(processed_posterior$B0, c(.025, .975))
+
+# B1 - true value = log(.75) = -0.2876821
+mean(processed_posterior$B1)
+quantile(processed_posterior$B1, c(.025, .975))
+
+
+# Sigma - true value = 1
+mean(processed_posterior$sigma)
+quantile(processed_posterior$sigma, c(.025, .975))
+
+# COMPARE WITH FREQUENTIST REGRESSION
+lm(log_elasticity~year, demand_data) %>% summary()
+```
+
+
+## Plot Regression
+Finally, I like to show how well the model captures the data by plotting the regression line on top of the data. To do this, I use the posterior means for the intercept and slope coefficients. I've also added a line for the frequentist regression line for comparison.
+```{r}
+plot(demand_data$year, demand_data$log_elasticity)
+# ADD Regression Line
+abline(coef = c(mean(processed_posterior$B0),  # intercept
+                mean(processed_posterior$B1))) # slope
+# COMPARE WITH FREQUENTIST REGRESSION
+abline(lm(log_elasticity~year, demand_data), col = "red")
+```
+Note that the frequentist and Bayesian regression lines are essentially right on top of one another. I'd say our Bayesian regression does pretty well.
+
+
+# What next?
+Now that you know how to implement an MCMC, the next thing I recommend doing is breaking the MCMC. This is a good way to figure out how it works. One place I recommend tinkering with is the priors, particularly the standard deviations. Look at what happens when you make the SDs narrow vs. wide. Another place is messing with the tuning parameters. Set the tuning parameter for $\beta_1$ to .5 and see how that affects estimates. Do any of these changes affect the posterior mean or spread? I recommend adding another variable to the model. I specifically included an additional variable: sex. Modify the code above (or building a new sampler) to test whether sex plays a role in elasticity of demand for fentanyl. The supplemental code illustrates how I did this but doing it on your own would be a good test of your knowledge.
