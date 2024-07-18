@@ -27,6 +27,16 @@ editor_options:
 ```
 
 
+# Set working directory
+
+```{r}
+library(rstudioapi) ## set working directory
+
+## Set working directory to wherever this script is
+setwd(dirname(getActiveDocumentContext()$path))
+
+```
+
 # Introducing NEST method
 
 Quantifying and spatially mapping brain-phenotype associations is a central component of many neuroimaging studies. 
@@ -90,7 +100,7 @@ knitr::include_graphics("imgs/nest.png")
 
 ## Prepare the data 
 
-Due to privacy regulationswe, we will not provide the data. Both brain imaging and phenotypic data used for the NEST method should be prepared or downloaded by users. For demostration, we use cifti data from hcp tutorial data. 
+Due to privacy regulations, we will not provide the data. Both brain imaging and phenotypic data used for the NEST method should be prepared or downloaded by users. For demonstration, we use cifti data from hcp tutorial data. 
 This open access dataset has been made freely available to the research community by the [WU-Minn HCP consortium](http://www.humanconnectome.org/).
 
 HCP Tutorial data (brain and phenotype data, account required), Connectome workbench can be downloaded [here](https://www.humanconnectome.org/software/get-connectome-workbench).
