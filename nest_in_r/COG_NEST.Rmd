@@ -98,6 +98,9 @@ HCP Tutorial data (brain and phenotype data, account required), Connectome workb
 Parcellation data (network labels) can be found [here](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal).
 
 ```{r}
+
+install.packages("ciftiTools") #When prompted with "Do you want to install from sources the package which needs compilation? (Yes/no/cancel)", type "no" and press "Enter"
+
 library(ciftiTools)
 library(parallel)
 
