@@ -1,5 +1,3 @@
-
-
 set.seed(20240708)
 # set.seed(20240603)
 
@@ -26,5 +24,4 @@ y = B0 + B1*x1 + B2*x2 + error
 demand_data =
   data.frame(id = 1:N, year = x1, sex = x2, log_elasticity = y)
 
-saveRDS(demand_data, here("demand_data.RDS"))
-
+saveRDS(demand_data, here("metro_mcmc_in_r", "demand_data.RDS"))

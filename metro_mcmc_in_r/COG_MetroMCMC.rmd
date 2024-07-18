@@ -1,14 +1,14 @@
 ---
 title: "Metropolic Markov Chain Monte Carlo Simulations in R"
 author:   
-  - name: "**Content Creator: Camille Johnston**"
+  - name: "**Content Creator: Jeremy Haynes**"
   - name: "**Content Editors: Steven Martinez, Katie Jobson, Billy Mitchell, and Helen Schmidt**"
 date: "2024-07-24"
 output:
   html_document:
     toc: true
     toc_float: true
-    toc_depth: 2
+    toc_depth: 3
     df_print: paged
     css: !expr here::here("_misc/style_bootcamp.css")
 knit: (function(inputFile, encoding) { 
@@ -20,13 +20,23 @@ editor_options:
   chunk_output_type: console
 ---
 
-```{r Introduction Video, echo = FALSE}
-# vembedr::embed_url("")
+```{r IGNORE THIS CODE UNLESS KNITTING AN HTML FILE, include = FALSE}
+library(vembedr)
+library(htmltools)
+```
+
+# Conceptual Background
+
+```{r IGNORE THIS CODE UNLESS KNITTING AN HTML FILE - Intro, echo = FALSE}
+div(
+  style = "display: flex; justify-content: center;",
+  vembedr::embed_url("https://youtu.be/MZZmoud2Nds")
+)
 ```
 
 
 # Install/Load Packages
-```{r}
+```{r message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = T, warning = F, message = F, fig.align = "center")
 
 # -------------------------------------
@@ -46,7 +56,7 @@ library(extraDistr)
 
 
 # Load Data
-For the sake of time, I will not be walking through how I simulated the data for the workshop; however, I highly recommend taking the time to [go through the code (demand_data_simulation.R)](). Knowing how to simulate data that is relevant to your work is an excellent way to truly understand the characteristics of the data that you work with. In addition, simulating data for a model forces you to think more deeply about the assumptions and constraints you are imposing with your model.
+For the sake of time, I will not be walking through how I simulated the data for the workshop; however, I highly recommend taking the time to [go through the code (demand_data_simulation.R)](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2024/blob/main/metro_mcmc_in_r/demand_data_simulation.R). Knowing how to simulate data that is relevant to your work is an excellent way to truly understand the characteristics of the data that you work with. In addition, simulating data for a model forces you to think more deeply about the assumptions and constraints you are imposing with your model.
 
 ## Load Data
 ```{r}
@@ -230,6 +240,14 @@ prior_sigma = function(current_sigma, sigma = 50){
 
 
 # Build the MCMC Sampler
+
+```{r IGNORE THIS CODE UNLESS KNITTING AN HTML FILE - Midpoint, echo = FALSE}
+div(
+  style = "display: flex; justify-content: center;",
+  vembedr::embed_url("https://youtu.be/EIiLMdYzpJo")
+)
+```
+
 Now that we have the functions we need to calculate our likelihood and priors, we'll use these functions in a Metropolis MCMC to estimate our regression model.
 ```{r}
 ###################
