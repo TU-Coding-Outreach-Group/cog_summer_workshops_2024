@@ -1,43 +1,78 @@
 # Coding Outreach Group Summer Workshop 2024
-# Network Enrichment Significance Testing (NEST)
+# Network Enrichment Significance Testing in Brain-phenotype Association Studies
+
 07/31/2024
 
-__**Content creator:**__ Bin Li  
-__**Workshop Leader:**__ Bin Li & Sarah Weinstein    
-__**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
+__**Content creator:**__ Bin Li \
+__**Content editors:**__ Bin Li, Sarah M. Weinstein
 
 ## Description
 
+Quantifying and spatially mapping brain-phenotype associations is crucial in neuroimaging studies, especially when interpreted through canonical functional networks, as it enhances our understanding of neural mechanisms underlying transdiagnostic psychopathology. Evaluating whether these associations are enriched within specific networks can reveal their role in different behaviors and cognitive functions. In this workshop, we will introduce Network Enrichment Significance Testing (NEST), a flexible framework for testing the specificity of brain-phenotype associations to functional networks or other sub-regions of the brain. Attendees will learn how to use NEST in both R and Python, including loading data, calling core functions and checking outputs.
 
 ## Prerequisites
+
 This workshop demands that users:
-1. have the R programming language downloaded, which can be accessed here:(https://archive.linux.duke.edu/cran/)
-2. have the R Studio user interface downloaded, which can be accessed here:(https://www.rstudio.com/products/rstudio/download/#download)
-3. have the packages listed in the following R script installed: (See index.html for instructions)
-4. have a proficiency with the R programming language
-5. have a basic familiarity with plotting data in R; previous primers can be accessed here: (https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2021/tree/main/data-visualization-in-r) 
+
+1. have the R/Python programming language downloaded, which can be accessed here:(R: <https://archive.linux.duke.edu/cran/> Python: <https://www.python.org/downloads/>)
+
+2. For R users, the R Studio user interface has to be downloaded, which can be accessed here:(<https://www.rstudio.com/products/rstudio/download/#download>). For Python users, the Jupyter Notenook book has to be installed. Instructions can be accessed here: (<https://jupyter.org/install>)
+
+3. have the packages listed in the following script installed: (See index.html for instructions)
+
+4. have a proficiency with the R/Python programming language
 
 ## Set Up (do before the workshop)
-1. Download the R Markdown script from github
+
+1. Download the R or Python scripts from github
 2. Download the dataset for the workshop
 3. Download the relevant packages (See below)
-    
+
+## Workshop objectives:
+
+1. Be able to read in brain imaging data into R/Python.
+
+2. Be able to read in phenotype data into R/Python.
+
+3. Be able to calculate brain-phenotype associations.
+
+4. Be able to compute enrichment score for observed statistics and null ditribution.
+
+5. Be able to compute p-value.
+
 ## Workshop materials:
-- [Notebook Viewer]()
+- [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/nest_in_r/index.html)
 
 ## What We Won't Cover:
 
-## Other Relevant COG Workshops:
-COG Workshops are often iterative; they build upon other workshops that we've already created. If you are unfamiliar with this topic, we recommend taking a look at some of our previous workshops to build some familiarity:
+We will not be covering basic coding ideas or basic knowledge of R and Python. We will not be covering how to use R Studio and Jupyter Notebook on their own.
 
-| Date        | Workshop                             | Presenter  |
-| :-----------: |:------------------------------------:| :-----------:|
-
+We will not provide the data due to privacy regulations. Both brain imaging and phenotypic data used for the NEST method should be prepared or downloaded by users. However, we provide instructions and sample codes to load data in the correct formats and shapes using R/Python.
 
 ## Outline
+
 | Section | Description | Time |
 | --- | --- | --- |
+| Intro | Video | 5 minutes |
+| Setup | Load packages and data in R| 5 minutes |
+| Section 1 | Introducing NEST method | 20 minutes |
+| Section 2 | Implementations in R| 10 minutes |
+| Section 3 | Results & Evaluations | 5 minutes |
+| Section 4 | Additional resources | 5 minutes |
+| Conclusion |  Q & A | 10 minutes |
 
+## Packages used for R
 
-## Supplemental Information
-Please see the `References and recommended resources` section of the Notebook Viewer
+* ```ciftiTools``` - [A toolkit for working with CIFTI-format neuroimaging data](https://github.com/mandymejia/ciftiTools)
+* ```devtools``` - [A libarary used for installing the NEST package from github](https://github.com/r-lib/devtools)
+* ```parallel``` - A libarary for parallel computing to speed up computations (R build-in package)
+
+## Packages used for Python
+
+* ```scipy``` - [A library used for scientific and technical computing](https://scipy.org/)
+* ```scikit-learn``` - [A machine learning library for Python](https://scikit-learn.org/)
+* ```pandas``` - [A library for data manipulation and analysis](https://pandas.pydata.org/)
+* ```matplotlib``` - [A plotting library for creating static, animated, and interactive visualizations](https://matplotlib.org/)
+* ```nibabel``` - [A library for accessing and processing neuroimaging data](https://nipy.org/nibabel/)
+* ```nilearn``` - [A library for fast and easy statistical learning analysis of neuroimaging data](https://nilearn.github.io/stable/index.html)
+* ```hcp_utils``` - [Utilities for handling Human Connectome Project data](https://rmldj.github.io/hcp-utils/)
