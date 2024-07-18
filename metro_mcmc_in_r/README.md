@@ -3,7 +3,7 @@
 07/24/2024
 
 __**Content creator:**__ Jeremy Haynes  
-__**Workshop Leader:**__   
+__**Workshop Leader:**__ Jeremy Haynes  
 __**Content editor:**__ Billy Mitchell
 
 ### [Full Workshop Recording]()
