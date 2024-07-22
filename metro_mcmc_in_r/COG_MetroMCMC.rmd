@@ -64,7 +64,7 @@ demand_data = readRDS(here("metro_mcmc_in_r", "demand_data.RDS"))
 ```
 
 ## Inspect Data
-The dataset contains 4 variables: $id$, $year$ (years using fentanyl), $sex$ (female = 0, male = 1), and $log_{elasticity}$ (how sensitive consumption/demand is to changes in price). These data are already formatted for our purposes, but it is worth inspecting the data.
+The dataset contains 4 variables: $id$, $year$ (years using fentanyl), $sex$ (female = 0, male = 1), and $log\_{elasticity}$ (how sensitive consumption/demand is to changes in price). These data are already formatted for our purposes, but it is worth inspecting the data.
 ```{r}
 # QUICK PEAK
 head(demand_data)
