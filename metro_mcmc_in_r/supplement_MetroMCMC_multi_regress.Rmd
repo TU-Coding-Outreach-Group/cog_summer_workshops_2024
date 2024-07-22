@@ -1,0 +1,308 @@
+#---------------------------------------------------------
+# Regression w/ Covariate
+## Additional functions
+### Multiple Covariate Likelihood
+```{r}
+calculate_covariate_likelihood = function(y, x1, x2, B0, B1, B2, sigma){
+  log_likelihood = dnorm(y, B0 + B1*x1 + B2*x2, sigma, log = TRUE) %>%
+    sum()
+  return(log_likelihood)
+}
+```
+
+
+### B2 Prior
+```{r}
+prior_B2 = function(B2, mu = 0, sigma = 50){
+  log_prior = dnorm(x = B2, mean = mu, sd = sigma, log = T)
+  return(log_prior)
+}
+```
+
+
+### Summarise Posterior
+```{r}
+sum_pos = function(x){
+  paste0("M = ", round(mean(x), 2),
+        "; 95% IQR = ", round(quantile(x, .025),2),
+        ",", round(quantile(x, .975), 2)) %>% 
+    return()
+}
+```
+
+
+
+## Sampler
+```{r}
+###################
+#### INITIAL SETUP
+###################
+set.seed(20240706)
+n_iterations = 20000
+tuning = .5
+tuning_B1 = .05
+tuning_B2 = .5
+posterior = data.frame(iteration = 1:n_iterations,
+                       B0 = numeric(n_iterations),
+                       B1 = numeric(n_iterations),
+                       B2 = numeric(n_iterations),
+                       sigma = numeric(n_iterations),
+                       accept_B0 = numeric(n_iterations),
+                       accept_B1 = numeric(n_iterations),
+                       accept_B2 = numeric(n_iterations),
+                       accept_sigma = numeric(n_iterations)) 
+
+
+# STEP 0: CHOOSE INITIAL VALUES
+posterior$B0[1] = runif(1, -10, 10) 
+posterior$B1[1] = runif(1, -10, 10) 
+posterior$B2[1] = runif(1, -10, 10) 
+posterior$sigma[1] = runif(1, 0, 10)
+likelihood = calculate_covariate_likelihood(y = demand_data$log_elasticity,
+                                            x1 = demand_data$year,
+                                            x2 = demand_data$sex,
+                                            B0 = posterior$B0[1],
+                                            B1 = posterior$B1[1],
+                                            B2 = posterior$B2[1],
+                                            sigma = posterior$sigma[1])
+
+
+###################
+#### MCMC
+###################
+for(i in 2:n_iterations){
+  
+  ###################
+  ##### UPDATE B0
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  candidate = rnorm(1, posterior$B0[i-1], tuning)
+
+  # STEP 2: ESTIMATE P(ACCEPT)
+  # calculate likelihood of candidate
+  candidate_likelihood = 
+    calculate_covariate_likelihood(y = demand_data$log_elasticity,
+                                   x1 = demand_data$year,
+                                   x2 = demand_data$sex,
+                                   B0 = candidate,
+                                   B1 = posterior$B1[i-1],
+                                   B2 = posterior$B2[i-1],
+                                   sigma = posterior$sigma[i-1])
+  
+  # calculate joint distributions
+  joint_current = likelihood + prior_B0(posterior$B0[i-1])
+  joint_candidate = candidate_likelihood + prior_B0(candidate)
+  
+  # calculate acceptance probability
+  R = exp(joint_candidate - joint_current)
+  
+  
+  # STEP 3: ACCEPT OR REJECT
+  if(R > runif(1)) {
+    posterior$B0[i] = candidate
+    posterior$accept_B0[i] = 1
+    likelihood = candidate_likelihood
+  } else {
+    posterior$B0[i] = posterior$B0[i-1]
+  }
+  
+  
+  ###################
+  ##### UPDATE B1
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  candidate = rnorm(1, posterior$B1[i-1], tuning_B1)
+
+  # STEP 2: ESTIMATE P(ACCEPT)
+  # calculate likelihood of candidate
+  candidate_likelihood = 
+    calculate_covariate_likelihood(y = demand_data$log_elasticity,
+                                   x1 = demand_data$year,
+                                   x2 = demand_data$sex,
+                                   B0 = posterior$B0[i],
+                                   B1 = candidate,
+                                   B2 = posterior$B2[i-1],
+                                   sigma = posterior$sigma[i-1])
+
+  # calculate joint distributions
+  joint_current = likelihood + prior_B1(posterior$B1[i-1])
+  joint_candidate = candidate_likelihood + prior_B1(candidate)
+  
+  # calculate acceptance probability
+  R = exp(joint_candidate - joint_current)
+  
+  
+  # STEP 3: ACCEPT OR REJECT
+  if(R > runif(1)){
+    posterior$B1[i] = candidate
+    posterior$accept_B1[i] = 1
+    likelihood = candidate_likelihood
+  } else {
+    posterior$B1[i] = posterior$B1[i-1]
+  }
+  
+  
+  ###################
+  ##### UPDATE B2
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  candidate = rnorm(1, posterior$B2[i-1], tuning_B2)
+
+  # STEP 2: ESTIMATE P(ACCEPT)
+  # calculate likelihood of candidate
+  candidate_likelihood = 
+    calculate_covariate_likelihood(y = demand_data$log_elasticity,
+                                   x1 = demand_data$year,
+                                   x2 = demand_data$sex,
+                                   B0 = posterior$B0[i],
+                                   B1 = posterior$B1[i],
+                                   B2 = candidate,
+                                   sigma = posterior$sigma[i-1])
+  
+  # calculate joint distributions
+  joint_current = likelihood + prior_B2(posterior$B2[i-1])
+  joint_candidate = candidate_likelihood + prior_B2(candidate)
+  
+  # calculate acceptance probability
+  R = exp(joint_candidate - joint_current)
+  
+  
+  # STEP 3: ACCEPT OR REJECT
+  if(R > runif(1)){
+    posterior$B2[i] = candidate
+    posterior$accept_B2[i] = 1
+    likelihood = candidate_likelihood
+  } else {
+    posterior$B2[i] = posterior$B2[i-1]
+  }
+  
+  
+  ###################
+  ##### UPDATE Sigma
+  ###################
+  
+  # STEP 1: PROPOSE CANDIDATE
+  candidate = rnorm(1, posterior$sigma[i-1], tuning)
+  
+  if(candidate < 0){
+    posterior$sigma[i] = posterior$sigma[i-1]
+  }else{
+    # STEP 2: ESTIMATE P(ACCEPT)
+    # calculate likelihood of candidate
+    candidate_likelihood = 
+      calculate_covariate_likelihood(y = demand_data$log_elasticity,
+                                     x1 = demand_data$year,
+                                     x2 = demand_data$sex,
+                                     B0 = posterior$B0[i],
+                                     B1 = posterior$B1[i],
+                                     B2 = posterior$B2[i],
+                                     sigma = candidate)
+    
+    # calculate joint distributions
+    joint_current = likelihood + prior_sigma(posterior$sigma[i-1])
+    joint_candidate = candidate_likelihood + prior_sigma(candidate)
+    
+    # calculate acceptance probability
+    R = exp(joint_candidate - joint_current)
+    
+    
+    # STEP 3: ACCEPT OR REJECT
+    if(R > runif(1)){
+      posterior$sigma[i] = candidate
+      posterior$accept_sigma[i] = 1
+      likelihood = candidate_likelihood
+    } else {
+      posterior$sigma[i] = posterior$sigma[i-1]
+    }
+  }
+}
+```
+
+
+#---------------------------------------------------------
+# Process Posterior Distributions
+## Trace-Plots
+```{r}
+burnin = 1:round(max(posterior$iteration)/4)
+processed_posterior = posterior %>% 
+  filter(!(iteration %in% burnin))
+
+
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$B0,
+     type = "l", main = paste("Acceptance Rate =", 
+                              round(mean(processed_posterior$accept_B0), 2)))
+
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$B1,
+     type = "l", main = paste("Acceptance Rate =", 
+                              round(mean(processed_posterior$accept_B1), 2)))
+
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$B2,
+     type = "l", main = paste("Acceptance Rate =", 
+                              round(mean(processed_posterior$accept_B2), 2)))
+
+plot(x = processed_posterior$iteration, 
+     y = processed_posterior$sigma,
+     type = "l", main = paste("Acceptance Rate =", 
+                              round(mean(processed_posterior$accept_sigma), 2)))
+```
+
+
+## Distribution Plots
+```{r}
+hist(x = processed_posterior$B0,
+     main = sum_pos(processed_posterior$B0), breaks = 50)
+abline(v = mean(processed_posterior$B0), col = "red", lwd = 2)
+abline(v = log(.025), col = "red", lty = "dashed", lwd = 2)
+
+
+hist(x = processed_posterior$B1,
+     main = sum_pos(processed_posterior$B1), breaks = 50)
+abline(v = mean(processed_posterior$B1), col = "red", lwd = 2)
+abline(v = log(.75), col = "red", lty = "dashed", lwd = 2)
+
+
+hist(x = processed_posterior$B2,
+     main = sum_pos(processed_posterior$B2), breaks = 50)
+abline(v = mean(processed_posterior$B2), col = "red", lwd = 2)
+abline(v = log(1), col = "red", lty = "dashed", lwd = 2)
+
+
+hist(x = processed_posterior$sigma,
+     main = sum_pos(processed_posterior$sigma), breaks = 50)
+abline(v = mean(processed_posterior$sigma), col = "red", lwd = 2)
+abline(v = 1, col = "red", lty = "dashed", lwd = 2) 
+```
+
+
+## Summary Statistics
+```{r}
+# SUMMARIZE PARAMETER VALUES - Posterior Means & Inner Quantile Ranges
+# B0 - true value = log(.025) = -3.688879
+mean(processed_posterior$B0)
+quantile(processed_posterior$B0, c(.025, .975))
+
+# B1 - true value = log(.75) = -0.2876821
+mean(processed_posterior$B1)
+quantile(processed_posterior$B1, c(.025, .975))
+
+# B2 - true value = log(1) = 0
+mean(processed_posterior$B2)
+quantile(processed_posterior$B2, c(.025, .975))
+
+
+# Sigma - true value = 1
+mean(processed_posterior$sigma)
+quantile(processed_posterior$sigma, c(.025, .975))
+
+# COMPARE WITH FREQUENTIST REGRESSION
+lm(log_elasticity~year + sex, demand_data) %>% summary()
+```
+
+
+#---------------------------------------------------------

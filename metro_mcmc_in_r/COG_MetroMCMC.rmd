@@ -64,7 +64,7 @@ demand_data = readRDS(here("metro_mcmc_in_r", "demand_data.RDS"))
 ```
 
 ## Inspect Data
-The dataset contains 4 variables: $id$, $year$ (years using fentanyl), $sex$ (female = 0, male = 1), and $log_elasticity$ (how sensitive consumption/demand is to changes in price). These data are already formatted for our purposes, but it is worth inspecting the data.
+The dataset contains 4 variables: $id$, $year$ (years using fentanyl), $sex$ (female = 0, male = 1), and $log_{elasticity}$ (how sensitive consumption/demand is to changes in price). These data are already formatted for our purposes, but it is worth inspecting the data.
 ```{r}
 # QUICK PEAK
 head(demand_data)
@@ -101,16 +101,16 @@ Overall, we have three parameters to estimate: $\beta_0$, $\beta_1$, and $\sigma
 $$P(\beta_0, \beta_1,\sigma|y_i)$$
 
 We'll do this with Bayes rule:
-$$P(\beta_0, \beta_1,\sigma|y_i) = \frac{P(y_i|\beta_0, \beta_1,\sigma) \cdot P(\beta_0) P(\beta_1) P(\sigma)}{P(y_i)}$$
+$$P(\beta_0, \beta_1,\sigma|) = \frac{P(y|\beta_0, \beta_1,\sigma) \cdot P(\beta_0) P(\beta_1) P(\sigma)}{P(y)}$$
 
-Because we're using MCMC to sample from the posterior distribution, we do not need to estimate the marginal distribution (i.e., the denominator): $P(y_i)$. Thus,
-$$P(\beta_0, \beta_1,\sigma|y_i) \propto P(y_i|\beta_0, \beta_1, \sigma) \cdot P(\beta_0) P(\beta_1) P(\sigma)$$
+Because we're using MCMC to sample from the posterior distribution, we do not need to estimate the marginal distribution (i.e., the denominator): $P(y)$. Thus,
+$$P(\beta_0, \beta_1,\sigma|y) \propto P(y|\beta_0, \beta_1, \sigma) \cdot P(\beta_0) P(\beta_1) P(\sigma)$$
 Where we have the posterior distribution on the left as proportional to the joint distribution of the prior and the likelihood on the right. Now that we've specified our model, we need to build each piece.
 
 
 ## The Likelihood
 Here, our goal is to calculate the probability of the data, given a set of parameter values:
-$$P(y_i|\beta_0, \beta_1, \sigma)$$
+$$P(y|\beta_0, \beta_1, \sigma)$$
 
 We'll do this by calculating the joint probability of all the data assuming the data were generated from a given set of parameters.
 $$= P(y_1|\beta_0, \beta_1, \sigma) \times P(y_2|\beta_0, \beta_1, \sigma) \times... P(y_N|\beta_0, \beta_1, \sigma)$$
@@ -184,26 +184,26 @@ lines(x = 0:200, y = dhnorm(0:200, 50), col = "red") # plot a half-normal for re
 ```
 
 ### Considerations for Priors
-Is the range of plausible parameter values captured by this distribution? For example, set a much more informative prior on $\beta_1$ (by lowering the SD to say 1) and think about whether your mean would fall in this range. Compare with your weakly informative prior. The first 2 plots show what a more informative prior looks like on the same x-axis scale as before. The next 2 plots show what that prior looks like on a smaller x-axis scale.
+Is the range of plausible parameter values captured by this distribution? For example, set a much more informative prior on $\beta_0$ (by lowering the SD to say 1) and think about whether your mean would fall in this range. Compare with your weakly informative prior. The first 2 plots show what a more informative prior looks like on the same x-axis scale as before. The next 2 plots show what that prior looks like on a smaller x-axis scale.
 ```{r}
-B1_prior = rnorm(1000, 0, 1)
-hist(B1_prior, breaks = 50, xlim = c(-200, 200))
+B0_prior = rnorm(1000, 0, 1)
+hist(B0_prior, breaks = 50, xlim = c(-200, 200))
 plot(x = -200:200, y = dnorm(-200:200, 0, 1), 
-     xlab = "B1", ylab = "probability",
+     xlab = "B0", ylab = "probability",
      type = "l")
 
 
-hist(B1_prior, breaks = 50, xlim = c(-10, 10))
+hist(B0_prior, breaks = 50, xlim = c(-10, 10))
 plot(x = -10:10, y = dnorm(-10:10, 0, 1), 
-     xlab = "B1", ylab = "probability",
+     xlab = "B0", ylab = "probability",
      type = "l")
 ```
 
-Does this distribution suggest ridiculous values are plausible? Set a uniform prior for $\beta_1$ ranging from values that are functionally infinite (e.g., -10000 to +10000).
+Does this distribution suggest ridiculous values are plausible? Set a uniform prior for $\beta_0$ ranging from values that are functionally infinite (e.g., -10000 to +10000).
 ```{r}
 hist(runif(1000, -10000, +10000), breaks = 50)
 ```
-Are values of +/-10000 even remotely realistic? You have prior knowledge about this. Use that. I personally know that log elasticities as extreme as say +/-10 would be rare, and values as extreme as +/-100 are probably impossible given the constraints of the task (remember, tasks can only provide a range of values - e.g., an SAT scores have a minimum of 400). For this data, $Normal(0,50)$ priors are very weakly informative, so stronger priors could be appropriate. Note, however, that the scaling of your variables affects how informative your priors are too. For example, if you were to recode years of fentanyl use into days without changing the prior on the slope effect (i.e., $\beta_1$), that prior now becomes extraordinarily uninformative. This is because the expected slope effect is $\sim \beta_1 / 365$. The reverse is also true (e.g., if we recoded years of fentanyl use into decades).
+Are values of +/-10000 even remotely realistic? You have prior knowledge about this. Use that. I personally know that log elasticities as extreme as say +/-10 would be rare, and values as extreme as +/-100 are probably impossible given the constraints of the task (remember, tasks can only provide a range of values - e.g., SAT scores have a minimum of 400). For this data, $Normal(0,50)$ priors are very weakly informative, so stronger priors could be appropriate. Note, however, that the scaling of your variables affects how informative your priors are too. For example, if you were to recode years of fentanyl use into days without changing the prior on the slope effect (i.e., $\beta_0$), that prior now becomes extraordinarily uninformative. This is because the expected slope effect is $\sim \beta_0 / 365$. The reverse is also true (e.g., if we recoded years of fentanyl use into decades).
 
 As with the likelihood, we'll calculate our prior probabilities during each iteration of the MCMC; thus, we should throw this into a function to make things easier.
 ```{r}

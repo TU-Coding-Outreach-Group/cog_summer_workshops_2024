@@ -6,7 +6,7 @@ __**Content creator:**__ Jeremy Haynes
 __**Workshop Leader:**__ Jeremy Haynes  
 __**Content editor:**__ Billy Mitchell
 
-### [Full Workshop Recording]()
+<!-- ### [Full Workshop Recording]()  -->
 
 ## Description
 This week's workshop will be an introduction to Markov Chain Monte Carlo (MCMC) algorithms. We'll be showing you how to program a metropolis MCMC algorithm for a Bayesian simple linear regression model. A brief overview of Bayesian modeling and MCMC will be provided, followed by step-by-step instructions for programming the model in R. The goal is for the audience to have a better grasp of what MCMC does broadly so they feel more comfortable using programs that rely on MCMC. Some examples include FSL, AFNI, and Stan, but they have utility in some commons applications like [predictive text](https://getrecast.com/monte-carlo-simulations/), [recommendation systems](https://dl.acm.org/doi/10.1145/2507157.2507224), and [financial risk assessment](https://www.mdpi.com/2227-9091/8/1/6), too.
@@ -52,6 +52,8 @@ COG Workshops are often iterative; they build upon other workshops that we've al
 | Conclusion |  Q & A | 10 minutes |
 
 ## Supplemental Information
+* [The script Jeremy used to simulate this data](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2024/tree/main/metro_mcmc_in_r/supplement_demand_data_sim.R)
+* [A script performing Metropolic MCMC multiple regression](https://github.com/TU-Coding-Outreach-Group/cog_summer_workshops_2024/tree/main/metro_mcmc_in_r/supplement_MetroMCMC_multi_regress.Rmd)
 * [Nate Haines' website who has some great explanations of Bayesian analysis in his blogs](http://haines-lab.com/)
 * [Clark Rushing's walkthrough of the same material (this is who I learned this from)](https://rushinglab.github.io/WILD6900/articles/metropolis.html)
 * [Statistical Rethinking lectures by Richard McElreath](https://www.youtube.com/playlist?list=PLDcUM9US4XdPz-KxHM4XHt7uUVGWWVSus)
