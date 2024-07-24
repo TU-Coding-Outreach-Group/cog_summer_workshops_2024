@@ -109,17 +109,19 @@ Parcellation data (network labels) can be found [here](https://github.com/Thomas
 
 ```{r}
 
-install.packages("ciftiTools") #When prompted with "Do you want to install from sources the package which needs compilation? (Yes/no/cancel)", type "no" and press "Enter"
+#install.packages("ciftiTools") #When prompted with "Do you want to install from sources the package which needs compilation? (Yes/no/cancel)", type "no" and press "Enter"
 
 library(ciftiTools)
 library(parallel)
 
 # Set the path to the Connectome Workbench (adjust the path as per your installation)
-wb_path <- "G:/workbench"
+#wb_path <- "G:/workbench"
+#wb_path <- "/Users/tuh20985/Desktop/workbench"
+wb_path <- "/Users/tuh20985/Desktop/workbench/bin_macosxub"
 ciftiTools.setOption("wb_path", wb_path)
 
 # Read a CIFTI file
-cifti_file <- "./data/Q1-Q6_R440.All.corrThickness.32k_fs_LR.dscalar.nii"
+cifti_file <- "/Users/tuh20985/Desktop/workbench/data/Q1-Q6_R440.All.corrThickness.32k_fs_LR.dscalar.nii"
 cifti_data <- read_cifti(cifti_file)
 
 # Print the shape of data
