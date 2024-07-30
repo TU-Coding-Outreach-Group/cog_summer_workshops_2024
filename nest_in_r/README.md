@@ -20,9 +20,9 @@ This workshop demands that users:
 
 3. Have the data files downloaded **before** the workshop begins (Click [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/nest_in_r/index.html) to access workshop page for instructions)
 
-3. have the packages listed in the following script installed: (Click [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/nest_in_r/index.html) to access workshop page for instructions)
+4. Have the packages listed in the following script installed: (Click [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/nest_in_r/index.html) to access workshop page for instructions)
 
-4. have a proficiency with the R/Python programming language
+5. Have a proficiency with the R/Python programming language
 
 ## Set Up (do before the workshop)
 
