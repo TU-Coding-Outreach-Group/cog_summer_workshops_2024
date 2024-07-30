@@ -3,7 +3,7 @@
 
 07/31/2024
 
-__**Content creator:**__ Bin Li, Dr. Sarah Weinstein
+__**Content creator:**__ Bin Li, Dr. Sarah Weinstein \
 __**Content editors:**__ [Bin Li](bin.li@temple.edu), [Dr. Sarah M. Weinstein](sarah.m.weinstein@temple.edu), Steven Martinez
 
 ## Description
