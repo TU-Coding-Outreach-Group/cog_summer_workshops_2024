@@ -4,11 +4,11 @@
 07/31/2024
 
 __**Content creator:**__ Bin Li \
-__**Content editors:**__ Bin Li, Sarah M. Weinstein
+__**Content editors:**__ [Bin Li](bin.li@temple.edu), [Sarah M. Weinstein](sarah.m.weinstein@temple.edu)
 
 ## Description
 
-Quantifying and spatially mapping brain-phenotype associations is crucial in neuroimaging studies, especially when interpreted through canonical functional networks, as it enhances our understanding of neural mechanisms underlying transdiagnostic psychopathology. Evaluating whether these associations are enriched within specific networks can reveal their role in different behaviors and cognitive functions. In this workshop, we will introduce Network Enrichment Significance Testing (NEST), a flexible framework for testing the specificity of brain-phenotype associations to functional networks or other sub-regions of the brain. Attendees will learn how to use NEST in both R and Python, including loading data, calling core functions and checking outputs.
+Quantifying and spatially mapping brain-phenotype associations is crucial in neuroimaging studies, especially when interpreted through canonical functional networks, as it enhances our understanding of neural mechanisms underlying transdiagnostic psychopathology. Evaluating whether these associations are especially strong--or "enriched"--within specific networks can reveal their role in different behaviors and cognitive functions. In this workshop, we will introduce Network Enrichment Significance Testing (NEST), a flexible framework for testing the specificity of brain-phenotype associations to functional networks or other sub-regions of the brain. Attendees will learn how to use NEST in both R and Python, including formatting data, calling core functions and checking outputs.
 
 ## Prerequisites
 
@@ -30,15 +30,9 @@ This workshop demands that users:
 
 ## Workshop objectives:
 
-1. Be able to read in brain imaging data into R/Python.
+1. Understand the framework of NEST for testing spatial specificity in brain-phenotype association studies.
 
-2. Be able to read in phenotype data into R/Python.
-
-3. Be able to calculate brain-phenotype associations.
-
-4. Be able to compute enrichment score for observed statistics and null ditribution.
-
-5. Be able to compute p-value.
+2. Be able to implement NEST in R and/or python.
 
 ## Workshop materials:
 - [Notebook Viewer](https://tu-coding-outreach-group.github.io/cog_summer_workshops_2024/nest_in_r/index.html)
@@ -47,25 +41,24 @@ This workshop demands that users:
 
 We will not be covering basic coding ideas or basic knowledge of R and Python. We will not be covering how to use R Studio and Jupyter Notebook on their own.
 
-We will not provide the data due to privacy regulations. Both brain imaging and phenotypic data used for the NEST method should be prepared or downloaded by users. However, we provide instructions and sample codes to load data in the correct formats and shapes using R/Python.
+While we are not able to provide the preprocessed data from the Philadelphia Neurodevelopmental Cohort (used in our paper), these data are available in raw format [here](https://www.ncbi.nlm.nih.gov/projects/gap/cgi-bin/study.cgi?study_id=phs000607.v3.p2). For the purpose of this tutorial, we illustrate the use of NEST using publicly available preprocessed data from the [Human Connectome Project (HCP)](https://db.humanconnectome.org/data/projects/HCP_1200).
 
 ## Outline
 
 | Section | Description | Time |
 | --- | --- | --- |
-| Intro | Video | 5 minutes |
-| Setup | Load packages and data in R| 5 minutes |
-| Section 1 | Introducing NEST method | 20 minutes |
-| Section 2 | Implementations in R| 10 minutes |
-| Section 3 | Results & Evaluations | 5 minutes |
+| Workshop Introduction | Video | 5 minutes |
+| Section 1 | Introducing NEST method | 15 minutes |
+| Section 2 | Implementations in R| 15 minutes |
+| Section 3 | Implementations in Python | 15 minutes |
 | Section 4 | Additional resources | 5 minutes |
-| Conclusion |  Q & A | 10 minutes |
+| Conclusion |  Q & A | 5 minutes |
 
 ## Packages used for R
 
 * ```ciftiTools``` - [A toolkit for working with CIFTI-format neuroimaging data](https://github.com/mandymejia/ciftiTools)
-* ```devtools``` - [A libarary used for installing the NEST package from github](https://github.com/r-lib/devtools)
-* ```parallel``` - A libarary for parallel computing to speed up computations (R build-in package)
+* ```devtools``` - [A library used for installing the NEST package from github](https://github.com/r-lib/devtools)
+* ```parallel``` - [A library for parallel computing to speed up computations](https://www.rdocumentation.org/packages/parallel/versions/3.6.2)
 
 ## Packages used for Python
 
