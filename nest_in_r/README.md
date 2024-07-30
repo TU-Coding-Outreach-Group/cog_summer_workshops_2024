@@ -3,8 +3,8 @@
 
 07/31/2024
 
-__**Content creator:**__ Bin Li \
-__**Content editors:**__ [Bin Li](bin.li@temple.edu), [Sarah M. Weinstein](sarah.m.weinstein@temple.edu)
+__**Content creator:**__ Bin Li, Dr. Sarah Weinstein
+__**Content editors:**__ [Bin Li](bin.li@temple.edu), [Dr. Sarah M. Weinstein](sarah.m.weinstein@temple.edu), Steven Martinez
 
 ## Description
 
@@ -18,6 +18,8 @@ This workshop demands that users:
 
 2. For R users, the R Studio user interface has to be downloaded, which can be accessed here:(<https://www.rstudio.com/products/rstudio/download/#download>). For Python users, the Jupyter Notenook book has to be installed. Instructions can be accessed here: (<https://jupyter.org/install>)
 
+3. Have the data files downloaded *before* the workshop begins (See index.html for instructions)
+
 3. have the packages listed in the following script installed: (See index.html for instructions)
 
 4. have a proficiency with the R/Python programming language
@@ -25,8 +27,8 @@ This workshop demands that users:
 ## Set Up (do before the workshop)
 
 1. Download the R or Python scripts from github
-2. Download the dataset for the workshop
-3. Download the relevant packages (See below)
+2. Download the data files for the workshop (See index.html for instructions)
+3. Install the relevant R packages (See index.html for instructions)
 
 ## Workshop objectives:
 
