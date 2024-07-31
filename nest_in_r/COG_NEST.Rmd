@@ -2,7 +2,7 @@
 title: "Network Enrichment Significance Testing in Brain-Phenotype Association Studies"
 author:   
   - name: "**Content Creator: Bin Li, Dr. Sarah Weinstein**"
-  - name: "**Content Editors: Bin Li, Dr. Sarah Weinstein, Steven Martinez**"
+  - name: "**Content Editors: Bin Li, Sarah Weinstein, Steven Martinez**"
 date: "2024-07-31"
 output:
   html_document:
@@ -176,7 +176,7 @@ Import necessary libraries for NEST:
 
 ```{r}
 #If you haven't installed the "parallel" package before this workshop, run this command first: install.packages("parallel")
-#If you haven't installed the "NEST" package before this workshop, run this command first: install.packages("NEST")
+#If you haven't installed the "NEST" package before this workshop, run this command first: install.packages("NEST")library(parallel)
 
 library(parallel)
 library(NEST)
@@ -202,8 +202,8 @@ knitr::include_graphics("imgs/workbench.png")
 knitr::include_graphics("imgs/brain-imaging.png")
 ```
 
-```{r, echo=FALSE, out.width='80%', fig.align='center', fig.cap='Behavioral data can be downloaded [here](https://db.humanconnectome.org/data/projects/HCP_1200).​​'}
-knitr::include_graphics("imgs/brain-imaging.png")
+```{r, echo=FALSE, out.width='40%', fig.align='center', fig.cap='Behavioral data can be downloaded [here](https://db.humanconnectome.org/data/projects/HCP_1200).​​'}
+knitr::include_graphics("imgs/behavioral.png")
 ```
 
 ```{r, echo=FALSE, out.width='80%', fig.align='center', fig.cap='Network partition data can be downloaded [here](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/HCP/fslr32k/cifti).'}
@@ -216,22 +216,14 @@ Once we get data ready, we will load them in R:
 
 
 ```{r}
-#If you haven't installed the "parallel" package before this workshop, run this command first: install.packages("parallel")
 library(ciftiTools)
-
-wb_path <- "/Users/tuh20985/Desktop/workbench/bin_macosxub" # specify your own path
-
+wb_path <- "/Users/binli/Documents/workbench/bin_macosxub" # specify your own path
 ciftiTools.setOption("wb_path", wb_path)
-
-cifti <- read_cifti("/Users/tuh20985/Desktop/workbench/data/Q1-Q6_R440.All.sulc.32k_fs_LR.dscalar.nii")
-
+cifti <- read_cifti("./data/Q1-Q6_R440.All.sulc.32k_fs_LR.dscalar.nii")
 sample_list <- cifti$meta$cifti$names
-
 id_list <- sub("_Sulc","", sample_list)
-
 X <- t(rbind(cifti$data$cortex_left, cifti$data$cortex_right))
 print(dim(X))
-
 # Visualize the CIFTI data
 view_xifti_surface(cifti)
 ```
@@ -239,15 +231,10 @@ view_xifti_surface(cifti)
 - Load phenotype of interest (y) and covariates (Z) 
 
 ```{r}
+behavior <- read.csv("./data/behavioral.csv", row.names="Subject")
 
-behavior <- read.csv("/Users/tuh20985/Desktop/workbench/data/unrestricted_steventmartinez_7_29_2024_15_2_18.csv", row.names="Subject") # specify your own path
-
-
-#If you haven't installed the "string" package before this workshop, run this command first: install.packages("stringr")
-#If you haven't installed the "tibble" package before this workshop, run this command first: install.packages("tibble")
 library(stringr)
 library(tibble)
-
 calculate_average_age <- function(age_value) {
   if (grepl("^[0-9]+-[0-9]+$", age_value)) {
     # Check if the age value is a range
@@ -265,7 +252,7 @@ calculate_average_age <- function(age_value) {
     return(NA)
   }
 }
-
+print(behavior[0:10,"Age"])
 # Apply the function to the Age column
 behavior$Age <- sapply(behavior$Age, calculate_average_age)
 
@@ -285,7 +272,7 @@ print(length(age))
 - A list (`net`) of one or more vectors is created for network(s) of interest (e.g., `net_7` indicates vertex membership in the default mode network)  
 
 ```{r}
-net_data <- read_cifti("/Users/tuh20985/Desktop/workbench/data/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii") # specify your own path
+net_data <- read_cifti("./data/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii")
 # names(net$data)
 parcel_1000 <- t(rbind(net_data$data$cortex_left, net_data$data$cortex_right))
 
@@ -319,7 +306,6 @@ map_network <- function(name) {
     return(-1)  # Return -1 for unexpected values
   }
 }
-
 mapped_parcel_map <- unlist((sapply(parcel_labels[-1], map_network)))
 
 networks <- unlist(lapply(parcel_1000, function(vertex) {
@@ -330,6 +316,11 @@ networks <- unlist(lapply(parcel_1000, function(vertex) {
 net <- list(
   Default = as.integer(networks == 7) 
 )
+
+
+print(parcel_1000[1:10])
+print(networks[1:10])
+print(net$Default[1:10])
 
 ```
 
@@ -372,7 +363,7 @@ args.lm <- list(
     y = age, # phenotype of interest (dimension N)
     Z = sex, # covariates (dimension (N x # number of covariates)
     type = "coef", # what type of test statistic to extract from linear regression model (note: if using a different type of model for statistic, this may be different. see source code)
-    n.perm = 999 # how many permutations to use to obtain null distribution
+    n.perm = 10 # how many permutations to use to obtain null distribution
 )
 ```
 Note: non-linear regression-based statistics can also be used. This example is just for the regression-based statistic.
@@ -397,7 +388,6 @@ Arguments for NEST function:
 
 - `what.to.return`: specify what values to return. `"everything"` will include p-value, enrichment score, null distribution, etc. If left unspecified, the default is to return only the p-value for each network.
 ```{r, eval=FALSE}
-
 out <- NEST(statFun = "lm",
             args = args.lm, # arguments defined above (specific to statFun="lm" setting)
             net.maps = net, 
@@ -406,6 +396,12 @@ out <- NEST(statFun = "lm",
             seed = 10, 
             what.to.return = "everything")
 
+```
+
+
+```{r, eval=FALSE}
+out$ES
+out$pval
 ```
 
 # Implementations in Python
