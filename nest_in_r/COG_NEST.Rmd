@@ -1,8 +1,8 @@
 ---
 title: "Network Enrichment Significance Testing in Brain-Phenotype Association Studies"
 author:   
-  - name: "**Content Creator: Bin Li, Dr. Sarah Weinstein**"
-  - name: "**Content Editors: Bin Li, Sarah Weinstein, Steven Martinez**"
+  - name: "**Content Creator: Bin Li**"
+  - name: "**Content Editors: Bin Li, Sarah Weinstein**"
 date: "2024-07-31"
 output:
   html_document:
@@ -26,17 +26,6 @@ editor_options:
 vembedr::embed_url("https://youtu.be/PwcKIOFuwX0")
 ```
 
-
-# Set working directory
-
-```{r}
-
-#If you haven't installed the "rstudioapi" package before this workshop, run this command first: install.packages("rstudioapi")
-library(rstudioapi) ## set working directory
-
-## Set working directory to wherever this script is
-setwd(dirname(getActiveDocumentContext()$path))
-```
 
 # Introducing NEST method
 
@@ -175,9 +164,6 @@ Import necessary libraries for NEST:
 - `parallel` for efficient parallel computing across multiple processor cores or machines to speed up computations.
 
 ```{r}
-#If you haven't installed the "parallel" package before this workshop, run this command first: install.packages("parallel")
-#If you haven't installed the "NEST" package before this workshop, run this command first: install.packages("NEST")library(parallel)
-
 library(parallel)
 library(NEST)
 ```
@@ -191,7 +177,7 @@ Connectome workbench can be downloaded [here](https://www.humanconnectome.org/so
 
 HCP Tutorial data V1.5 can be downloaded [here](https://balsa.wustl.edu/study/kN3mg) and behavioral data can be downloaded [here](https://db.humanconnectome.org/data/projects/HCP_1200), account required for both data.
 
-Network partition labels can be found [here](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Schaefer2018_LocalGlobal/Parcellations/HCP/fslr32k/cifti).
+Network partition labels can be found [here](https://github.com/ThomasYeoLab/CBIG/tree/master/stable_projects/brain_parcellation/Yeo2011_fcMRI_clustering/1000subjects_reference/Yeo_JNeurophysiol11_SplitLabels/fs_LR32k).
 
 
 ```{r, echo=FALSE, out.width='80%', fig.align='center', fig.cap='Workbench can be downloaded [here](https://www.humanconnectome.org/software/get-connectome-workbench)​.​'}
@@ -228,105 +214,44 @@ print(dim(X))
 view_xifti_surface(cifti)
 ```
 
+
 - Load phenotype of interest (y) and covariates (Z) 
 
 ```{r}
+
 behavior <- read.csv("./data/behavioral.csv", row.names="Subject")
 
-library(stringr)
-library(tibble)
-calculate_average_age <- function(age_value) {
-  if (grepl("^[0-9]+-[0-9]+$", age_value)) {
-    # Check if the age value is a range
-    bounds <- as.numeric(str_split(age_value, "-", simplify = TRUE))
-    avg_age <- ceiling(mean(bounds))
-    return(avg_age)
-  } else if (grepl("^[0-9]+$", age_value)) {
-    # If it's a specific value, return the age value as integer
-    return(as.numeric(age_value))
-  } else if (grepl("^[0-9]+\\+$", age_value)) {
-    # If the age value ends with '+', return the numeric part
-    return(as.numeric(str_remove(age_value, "\\+")))
-  } else {
-    # If it's not a valid range, specific value, or '36+', return NA
-    return(NA)
-  }
-}
-print(behavior[0:10,"Age"])
-# Apply the function to the Age column
-behavior$Age <- sapply(behavior$Age, calculate_average_age)
-
-# Print the modified data frame
-print(behavior[0:10,"Age"])
-```
-
-
-
-```{r}
 sex <- ifelse(behavior[id_list,"Gender"] == "F", 0, 1)
-age <- as.numeric(behavior[id_list,"Age"])
+age <- factor(behavior[id_list,"Age"], levels = unique(behavior$Age), ordered = T)
 print(length(sex))
 print(length(age))
+
 ```
+
  
 - A list (`net`) of one or more vectors is created for network(s) of interest (e.g., `net_7` indicates vertex membership in the default mode network)  
 
-```{r}
-net_data <- read_cifti("./data/Schaefer2018_1000Parcels_7Networks_order.dlabel.nii")
-# names(net$data)
-parcel_1000 <- t(rbind(net_data$data$cortex_left, net_data$data$cortex_right))
 
-parcel_labels <- as.list(rownames(net_data$meta$cifti$labels$parcels))
-print(parcel_labels)
-dim(parcel_1000)
+```{r}
+net_data <- read_cifti("./data/Yeo2011_7Networks_N1000.dlabel.nii")
+# names(net$data)
+yeo_7 <- t(rbind(net_data$data$cortex_left, net_data$data$cortex_right))
+
+print(yeo_7)
+dim(yeo_7)
+unique(c(yeo_7))
 ```
 
-We need to map from Schaefer2018 1000 parcels to yeo2011 7 networks. [*](https://github.com/ThomasYeoLab/CBIG/blob/master/stable_projects/brain_parcellation/Yeo2011_fcMRI_clustering/1000subjects_reference/Yeo_JNeurophysiol11_SplitLabels/Yeo2011_7networks_N1000.split_components.glossary.csv)
+
 ```{r}
-map_network <- function(name) {
-  # Split the name by '_'
-  netname <- unlist(strsplit(name, "_"))[3]
-  
-  # Define the mapping
-  if (netname == 'Vis') {
-    return(1)
-  } else if (netname == 'SomMot') {
-    return(2)
-  } else if (netname == 'DorsAttn') {
-    return(3)
-  } else if (netname == 'SalVentAttn') {
-    return(4)
-  } else if (netname == 'Limbic') {
-    return(5)
-  } else if (netname == 'Cont') {
-    return(6)
-  } else if (netname == 'Default') {
-    return(7)
-  } else {
-    return(-1)  # Return -1 for unexpected values
-  }
-}
-mapped_parcel_map <- unlist((sapply(parcel_labels[-1], map_network)))
-
-networks <- unlist(lapply(parcel_1000, function(vertex) {
-  return(mapped_parcel_map[vertex])
-}))
-
-# Create a binary vector indicating locations inside (1) or outside (0) the network 7.
 net <- list(
-  Default = as.integer(networks == 7) 
+  Default = as.integer(yeo_7 == 7) 
 )
 
-
-print(parcel_1000[1:10])
-print(networks[1:10])
-print(net$Default[1:10])
-
-```
-
-```{r}
-zero_indices <- which(parcel_1000 == 0)
+zero_indices <- which(yeo_7 == 0)
 X <- X[,-zero_indices]
+
+net$Default <- net$Default[-zero_indices]
 dim(X)
 length(net$Default)
 ```
@@ -360,10 +285,10 @@ The args can be defined as follows, assuming vertex-wise linear models will be f
 ```{r}
 args.lm <- list(
     X = X, # brain measurements (dimension N subjects x P image locations)
-    y = age, # phenotype of interest (dimension N)
-    Z = sex, # covariates (dimension (N x # number of covariates)
+    y = sex, # phenotype of interest (dimension N)
+    Z = age, # covariates (dimension (N x # number of covariates)
     type = "coef", # what type of test statistic to extract from linear regression model (note: if using a different type of model for statistic, this may be different. see source code)
-    n.perm = 10 # how many permutations to use to obtain null distribution
+    n.perm = 999 # how many permutations to use to obtain null distribution
 )
 ```
 Note: non-linear regression-based statistics can also be used. This example is just for the regression-based statistic.
@@ -387,7 +312,7 @@ Arguments for NEST function:
 - `seed`: random seed for reproducible permutation. Default is `NULL`, but we recommend setting one.
 
 - `what.to.return`: specify what values to return. `"everything"` will include p-value, enrichment score, null distribution, etc. If left unspecified, the default is to return only the p-value for each network.
-```{r, eval=FALSE}
+```{r,eval=FALSE}
 out <- NEST(statFun = "lm",
             args = args.lm, # arguments defined above (specific to statFun="lm" setting)
             net.maps = net, 
