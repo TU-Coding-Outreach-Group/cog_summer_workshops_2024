@@ -622,7 +622,7 @@ plot <- ggplot() +
   theme_void()
 
 ggsave(plot,
-       filename = "./images/zurich.png",
+       filename = "./output/zurich.png",
        width = 5,
        height = 3,
        units = "in",
@@ -630,7 +630,7 @@ ggsave(plot,
        device = "png")
 ```
 
-![](./images/zurich.png)
+![](./output/zurich.png)
 
 ```{r}
 # interlaken
@@ -642,7 +642,7 @@ plot <- ggplot() +
   theme_void() 
 
 ggsave(plot,
-       filename = "./images/interlaken.png",
+       filename = "./output/interlaken.png",
        width = 5,
        height = 3,
        units = "in",
@@ -650,7 +650,7 @@ ggsave(plot,
        device = "png")
 ```
 
-![](./images/interlaken.png)
+![](./output/interlaken.png)
 
 ## Online Open Data
 ```{r}
@@ -669,7 +669,7 @@ plot <- ggplot() +
 
 # save
 ggsave(plot,
-       filename = "./images/avalanche.png",
+       filename = "./output/avalanche.png",
        width = 5,
        height = 3,
        units = "in",
@@ -678,7 +678,7 @@ ggsave(plot,
 
 ```
 
-![](./images/avalanche.png)
+![](./output/avalanche.png)
 
 ## Elevation
 ```{r}
@@ -702,7 +702,7 @@ plot <- ggplot() +
 
 # save
 ggsave(plot,
-       filename = "./images/swiss-elevation.png",
+       filename = "./output/swiss-elevation.png",
        width = 5,
        height = 3,
        units = "in",
@@ -710,7 +710,7 @@ ggsave(plot,
        device = "png")
 ```
 
-![](./images/swiss-elevation.png)
+![](./output/swiss-elevation.png)
 
 # Next Steps
 
