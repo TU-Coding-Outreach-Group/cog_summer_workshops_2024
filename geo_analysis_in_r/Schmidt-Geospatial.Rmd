@@ -1,5 +1,6 @@
 ---
 title: "Geospatial Analysis & Cartography in R"   
+author:
   - name: "**Content Creator: Helen Schmidt**"
   - name: "**Content Editors: Steven Martinez**"
 date: "2024-08-01"
@@ -29,8 +30,7 @@ library(vembedr)
 ```
 
 
-# Set working directory to GitHub page
-```{r setwd, include=FALSE}
+```{r, include=FALSE}
 library(rstudioapi)
 
 ## Set working directory to wherever this script is
