@@ -6,6 +6,9 @@
 __**Content creator:**__ Bin Li, Dr. Sarah Weinstein \
 __**Content editors:**__ [Bin Li](bin.li@temple.edu), [Dr. Sarah M. Weinstein](sarah.m.weinstein@temple.edu), Steven Martinez
 
+### Due to a technical error, a recording of the workshop is not available
+However, the authors of this workshop did provide a video walkthrough, which can be accessed on the notebook viewer. 
+
 ## Description
 
 Quantifying and spatially mapping brain-phenotype associations is crucial in neuroimaging studies, especially when interpreted through canonical functional networks, as it enhances our understanding of neural mechanisms underlying transdiagnostic psychopathology. Evaluating whether these associations are especially strong--or "enriched"--within specific networks can reveal their role in different behaviors and cognitive functions. In this workshop, we will introduce Network Enrichment Significance Testing (NEST), a flexible framework for testing the specificity of brain-phenotype associations to functional networks or other sub-regions of the brain. Attendees will learn how to use NEST in both R and Python, including formatting data, calling core functions and checking outputs.
