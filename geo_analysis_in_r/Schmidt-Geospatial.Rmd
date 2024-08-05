@@ -39,7 +39,7 @@ setwd(dirname(getActiveDocumentContext()$path))
 ```
 
 
-```{r}
+```{r, echo = FALSE}
 # insert introduction video here
 #vembedr::embed_url("url to intro video")
 ```
