@@ -7,6 +7,7 @@ date: "2024-08-01"
 output:
   html_document:
     code-overflow: wrap
+    code_folding: show
     toc: true
     embed-resources: true
     smooth-scroll: true
@@ -39,9 +40,8 @@ setwd(dirname(getActiveDocumentContext()$path))
 ```
 
 
-```{r, echo = FALSE}
-# insert introduction video here
-#vembedr::embed_url("url to intro video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/kddxSTNQMR4")
 ```
 
 ## What is cartography?
@@ -83,9 +83,8 @@ Geospatial data is highly informative and complex, but we can leverage specializ
 
 Before we dive into specialized mapmaking packages in R, I first want to demonstrate how easy it is to make a map using data and graphing features native to `ggplot2`.
 
-```{r}
-# insert basic mapmaking video here
-#vembedr::embed_url("url to basic mapmaking video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/ihF72Ax9Ol4")
 ```
 
 ```{r}
@@ -162,7 +161,7 @@ pop <- capitals |>
 pop
 ```
 
-Now we have a new dataset containing the top 10 most populous U.S. capitals. We can use the name variable in this dataset to create a label on our map. One of my favorite geoms to use to add labels is `geom_label_repel()`, which will draw a rectangle underneath the text and make it easier to read. The labels also get repelled from the data points and from each other!
+Now we have a new dataset containing the top 10 most populuous U.S. capitals. We can use the name variable in this dataset to create a label on our map. One of my favorite geoms to use to add labels is `geom_label_repel()`, which will draw a rectangle underneath the text and make it easier to read. The labels also get repelled from the data points and from each other!
 
 ```{r}
 # add labels on our map
@@ -221,9 +220,8 @@ So what else can we do? Well, there are limitations to what we can make with dat
 
 # 2) OpenStreetMap
 
-```{r}
-# insert OSM video here
-#vembedr::embed_url("url to OSM video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/c3rF5XvOw3s")
 ```
 
 ::: {layout="[1, 3]" layout-valign="center"}
@@ -315,9 +313,6 @@ Ok now we have our OSM objects (roads and water) and the defined circle for Zür
 You may see a warning that says "attribute variables are assumed to be spatially constant throughout all geometries." You can ignore this, since we modified the data to ensure they are spatially constant!
 
 ```{r}
-#install.packages("wk") #####################################################
-library(wk)
-
 # get the intersection between roads/water and circle
 # will take a minute to execute
 zurich_roads_cropped <- st_intersection(zurich_circle, zurich_roads$osm_lines)
@@ -342,12 +337,11 @@ Now, try making a similar map to the one we just made using the city of Interlak
 
 ## Now it's your turn!
 
-```{r}
-# insert OSM challenge video here
-#vembedr::embed_url("url to OSM challenge video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/b3Z1EOvbmmI")
 ```
 
-```{r, warning = FALSE}
+```{r, class.source = 'fold-hide', warning = FALSE}
 #| code-fold: true
 #| code-summary: "Reveal Answer"
 
@@ -391,9 +385,8 @@ ggplot() +
 
 # 3) Online Open Data 
 
-```{r}
-# insert online open data video here
-#vembedr::embed_url("url to online open data video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/cbIS_nqWGuU")
 ```
 
 ::: {layout="[1, 3]" layout-valign="center"}
@@ -486,24 +479,22 @@ ggplot() +
 
 ## Now it's your turn!
 
-```{r}
-# insert open data challenge video here
-#vembedr::embed_url("url to open data challenge video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/hXaom17VRX0")
 ```
 
 Try using the avalanche coordinates to plot the exact locations for the 2022/23 hydrological year. Use the canton map we already created and `geom_point()` to plot the avalanche locations. If you want a bonus challenge, you can color the points by the number of people who died in the avalanches. 
 
 **HINT**: You'll need the following code to transform the latitude and longitude variables in the avalanche dataset to `sf` geometry. 
 
-```{r}
+```{r, eval=FALSE}
 #| eval: false
 new_avalanche_sf <- sf::st_as_sf(subset_avalanche_data,
                                  coords = c(LONGITUDE, LATITUDE),
                                  crs = 4326)
-
 ```
 
-```{r, warning = FALSE}
+```{r, class.source = 'fold-hide', warning = FALSE}
 #| code-fold: true
 #| code-summary: "Reveal Answer"
 
@@ -536,9 +527,8 @@ ggplot() +
 
 # 4) Elevation
 
-```{r}
-# insert elevation video here
-#vembedr::embed_url("url to elevation video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/lZ8my7HCBl8")
 ```
 
 The final type of geospatial data that we'll work with in this tutorial is elevation data. This reflects the geographic height of different locations, usually in reference to sea level. We will use this data to create contour lines, an old cartography technique that uses line spacing and thickness to denote elevation on a flat, 2D map. 
@@ -606,9 +596,8 @@ Cool! We now have a basic contour elevation map. As elevation increases, the con
 
 # Customize
 
-```{r}
-# insert customizing video here
-#vembedr::embed_url("url to customizing video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/8bHgnzgUH6M")
 ```
 
 ## OpenStreetMap
