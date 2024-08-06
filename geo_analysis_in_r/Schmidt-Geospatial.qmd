@@ -10,12 +10,7 @@ format:
     toc: true
     embed-resources: true
     smooth-scroll: true
-    css: !expr here::here("_misc/style_bootcamp.css")
-knit: (function(inputFile, encoding) { 
-      out_dir <- './';
-      rmarkdown::render(inputFile,
-                        encoding=encoding, 
-                        output_file=file.path(dirname(inputFile), out_dir, 'index.html')) })
+    css: "/Users/tuh20985/Documents/GitHub/cog_summer_workshops_2024/_misc/style_bootcamp.css"
 editor: source
 date-modified: today
 theme: flatly

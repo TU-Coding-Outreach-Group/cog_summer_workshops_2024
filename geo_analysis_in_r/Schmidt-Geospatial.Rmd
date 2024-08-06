@@ -7,7 +7,7 @@ date: "2024-08-07"
 output:
   html_document:
     code-overflow: wrap
-    code_folding: "none"
+    code_folding: show
     toc: true
     embed-resources: true
     smooth-scroll: true
@@ -505,6 +505,11 @@ new_avalanche_sf <- sf::st_as_sf(subset_avalanche_data,
                                  crs = 4326)
 ```
 
+```{r, code="'\n\n\n\n'", results=F}
+
+```
+
+Click `CODE` to see the solution! ==>
 
 ```{r, class.source = 'fold-hide', warning = FALSE}
 #| code-fold: true
