@@ -11,6 +11,11 @@ format:
     embed-resources: true
     smooth-scroll: true
     css: !expr here::here("_misc/style_bootcamp.css")
+knit: (function(inputFile, encoding) { 
+      out_dir <- './';
+      rmarkdown::render(inputFile,
+                        encoding=encoding, 
+                        output_file=file.path(dirname(inputFile), out_dir, 'index.html')) })
 editor: source
 date-modified: today
 theme: flatly
