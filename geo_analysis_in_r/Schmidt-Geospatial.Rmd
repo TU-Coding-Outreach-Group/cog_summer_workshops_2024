@@ -26,8 +26,6 @@ editor_options:
 
 ```{r Setup, include = FALSE, echo = FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-options(yaml.eval.expr = TRUE)
-knitr::opts_chunk$set(tidy.opts = list(width.cutoff = 75), tidy = TRUE)
 ```
 
 

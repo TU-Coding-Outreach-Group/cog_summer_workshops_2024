@@ -141,5 +141,8 @@ body{
     text-indent: inherit;
     padding-left: 2em;
     }
-  
+
+.code-folding-btn {
+  display: none;
+}
   
