@@ -1,25 +1,19 @@
 ---
-title: "Geospatial Analysis & Cartography in R"   
+title: "Geospatial Analysis & Cartography in R"
+author:
   - name: "**Content Creator: Helen Schmidt**"
   - name: "**Content Editors: Steven Martinez**"
-date: "2024-07-31"
-output:
-  html_document:
+date: "2024-08-07"
+format:  
+  html:
     code-overflow: wrap
     toc: true
     embed-resources: true
     smooth-scroll: true
-    toc_float: true
-    toc_depth: 2
-    df_print: paged
     css: !expr here::here("_misc/style_bootcamp.css")
-knit: (function(inputFile, encoding) { 
-      out_dir <- './';
-      rmarkdown::render(inputFile,
-                        encoding=encoding, 
-                        output_file=file.path(dirname(inputFile), out_dir, 'index.html')) })
-editor_options: 
-  chunk_output_type: console
+editor: source
+date-modified: today
+theme: flatly
 ---
 
 # Introduction
@@ -29,19 +23,8 @@ library(vembedr)
 ```
 
 
-# Set working directory to GitHub page
-```{r setwd, include=FALSE}
-library(rstudioapi)
-
-## Set working directory to wherever this script is
-setwd(dirname(getActiveDocumentContext()$path))
-
-```
-
-
-```{r}
-# insert introduction video here
-#vembedr::embed_url("url to intro video")
+```{r, echo=FALSE}
+vembedr::embed_url("https://youtu.be/kddxSTNQMR4")
 ```
 
 ## What is cartography?
@@ -162,7 +145,7 @@ pop <- capitals |>
 pop
 ```
 
-Now we have a new dataset containing the top 10 most populous U.S. capitals. We can use the name variable in this dataset to create a label on our map. One of my favorite geoms to use to add labels is `geom_label_repel()`, which will draw a rectangle underneath the text and make it easier to read. The labels also get repelled from the data points and from each other!
+Now we have a new dataset containing the top 10 most populuous U.S. capitals. We can use the name variable in this dataset to create a label on our map. One of my favorite geoms to use to add labels is `geom_label_repel()`, which will draw a rectangle underneath the text and make it easier to read. The labels also get repelled from the data points and from each other!
 
 ```{r}
 # add labels on our map
@@ -315,9 +298,6 @@ Ok now we have our OSM objects (roads and water) and the defined circle for Zür
 You may see a warning that says "attribute variables are assumed to be spatially constant throughout all geometries." You can ignore this, since we modified the data to ensure they are spatially constant!
 
 ```{r}
-#install.packages("wk") #####################################################
-library(wk)
-
 # get the intersection between roads/water and circle
 # will take a minute to execute
 zurich_roads_cropped <- st_intersection(zurich_circle, zurich_roads$osm_lines)
@@ -346,6 +326,13 @@ Now, try making a similar map to the one we just made using the city of Interlak
 # insert OSM challenge video here
 #vembedr::embed_url("url to OSM challenge video")
 ```
+
+
+```{r, code="'\n\n\n\n'", results=F}
+
+```
+
+Click `CODE` to see the solution! ==>
 
 ```{r, warning = FALSE}
 #| code-fold: true
@@ -500,7 +487,6 @@ Try using the avalanche coordinates to plot the exact locations for the 2022/23 
 new_avalanche_sf <- sf::st_as_sf(subset_avalanche_data,
                                  coords = c(LONGITUDE, LATITUDE),
                                  crs = 4326)
-
 ```
 
 ```{r, warning = FALSE}
