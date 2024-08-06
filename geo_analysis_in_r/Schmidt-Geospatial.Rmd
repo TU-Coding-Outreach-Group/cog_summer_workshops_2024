@@ -7,7 +7,7 @@ date: "2024-08-07"
 output:
   html_document:
     code-overflow: wrap
-    code_folding: show
+    code_folding: "none"
     toc: true
     embed-resources: true
     smooth-scroll: true
