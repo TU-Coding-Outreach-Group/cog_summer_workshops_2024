@@ -24,6 +24,12 @@ editor_options:
   chunk_output_type: console
 ---
 
+```{r Setup, include = FALSE, echo = FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(yaml.eval.expr = TRUE)
+```
+
+
 # Introduction
 ```{r load-hidden-packages, include=FALSE}
 # initial packages
@@ -341,6 +347,12 @@ Now, try making a similar map to the one we just made using the city of Interlak
 vembedr::embed_url("https://youtu.be/b3Z1EOvbmmI")
 ```
 
+```{r, code="'\n\n\n\n'", results=F}
+
+```
+
+Click `CODE` to see the solution! ==>
+
 ```{r, class.source = 'fold-hide', warning = FALSE}
 #| code-fold: true
 #| code-summary: "Reveal Answer"
@@ -493,6 +505,7 @@ new_avalanche_sf <- sf::st_as_sf(subset_avalanche_data,
                                  coords = c(LONGITUDE, LATITUDE),
                                  crs = 4326)
 ```
+
 
 ```{r, class.source = 'fold-hide', warning = FALSE}
 #| code-fold: true
