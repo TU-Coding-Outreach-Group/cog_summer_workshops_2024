@@ -720,11 +720,6 @@ ggsave(plot,
 
 # Next Steps
 
-```{r}
-# insert next steps video here
-#vembedr::embed_url("url to next steps video")
-```
-
 Congratulations, you are now a cartographer! What's next for your new mapmaking skills?
 
 Below you will find some additional resources for using spatial data and making maps in R. I've also included a few websites where you can find a lot of open geospatial data. 
