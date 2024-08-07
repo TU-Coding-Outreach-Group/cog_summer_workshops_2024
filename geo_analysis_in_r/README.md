@@ -3,8 +3,9 @@
 08/07/2024
 
 __**Content creator:**__ Helen Schmidt  
-__**Workshop Leader:**__   
-__**Content editor:**__ Katie Jobson, Billy Mitchell, Steven Martinez & Helen Schmidt
+__**Content editor:**__ Steven Martinez
+
+### [Full Workshop Recording](https://youtu.be/rYMl1RATjaM)
 
 ## Description
 This workshop will cover geospatial analysis and mapmaking (cartography) in R! We will start with an overview of mapmaking principles and highlight important decisions to consider when creating maps. Then, we will walk through how to make a basic map using native ggplot functions and datasets before diving into three specialized approaches. We will use online, open source data (e.g., OpenStreetMap, online data repositories) to create and customize maps. Attendees will have the opportunity to apply geospatial data analytics in this tutorial and explore online resources and upcoming mapmaking challenges as avenues to continue learning.
