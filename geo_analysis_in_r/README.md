@@ -31,7 +31,7 @@ This workshop demands that users:
 | Section | Description | Time |
 | --- | --- | --- |
 | Workshop Introduction | Video | 5 minutes |
-| Section 1 | Learning how to plot a basic map | 10 minutes |
+| Section 1 | Learning How to Plot a Map | 10 minutes |
 | Section 2 | Navigating OpenStreetMap (OSM) | 10 minutes |
 | Section 3 | Open Data Resources for Mapmaking | 15 minutes |
 | Section 4 | Plotting Elevation Data | 15 minutes |
